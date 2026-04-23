@@ -1,59 +1,90 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import api from '../services/api'
-import useAuthStore from '../store/authStore'
+import { useState } from "react";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
+import logo from "../assets/images/web_logo.png";
 
 export default function Login() {
-  const [email, setEmail] = useState('admin')
-  const [password, setPassword] = useState('admin123')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const setAuth = useAuthStore((state) => state.setAuth)
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { token, login } = useAuth();
 
-  const onSubmit = async (event) => {
-    event.preventDefault()
-    setLoading(true)
-    setError('')
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-    try {
-      const response = await api.post('/auth/login', { email, password })
-      const payload = response?.data?.data
-      localStorage.setItem('admin_csrf', payload?.csrf_token || '')
-      setAuth(payload?.token || '', payload?.admin || null)
-      navigate('/', { replace: true })
-    } catch (err) {
-      setError(err?.response?.data?.error || 'Login failed')
-    } finally {
-      setLoading(false)
-    }
+  const redirectTo = location.state?.from?.pathname || "/dashboard";
+
+  if (token) {
+    return <Navigate to={redirectTo} replace />;
   }
 
+  const onChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSubmitting(true);
+
+    try {
+      await login(form.email, form.password);
+      navigate(redirectTo, { replace: true });
+    } catch (err) {
+      setError(err?.message || "Invalid credentials");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <main className="min-h-screen grid place-items-center p-4">
-      <form onSubmit={onSubmit} className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg border border-stone-200">
-        <h1 className="text-2xl font-semibold mb-4">Admin Login</h1>
-        <input
-          className="w-full border border-stone-300 rounded-md p-2 mb-3"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email or username"
-        />
-        <input
-          className="w-full border border-stone-300 rounded-md p-2 mb-3"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-        />
-        {error ? <p className="text-sm text-red-600 mb-3">{error}</p> : null}
+    <div className="flex min-h-screen items-center justify-center bg-[#123523] px-4 py-6">
+      <form
+        onSubmit={onSubmit}
+        className="flex w-full max-w-sm flex-col items-center gap-6 rounded-2xl border border-[#f3a849]/35 bg-[#1a5e38] px-6 py-8 shadow-[0_14px_40px_rgba(0,0,0,0.35)] sm:max-w-md sm:px-10 sm:py-10"
+      >
+        <img src={logo} alt="MA Foodstuff" className="h-16 w-auto sm:h-20" />
+
+        <h1 className="text-3xl font-bold text-white sm:text-4xl">
+          Admin Login
+        </h1>
+
+        <div className="flex w-full flex-col gap-4 sm:gap-5">
+          <input
+            type="text"
+            name="email"
+            placeholder="ID or Email"
+            required
+            value={form.email}
+            onChange={onChange}
+            className="w-full rounded-lg border border-gray-100 bg-transparent p-2.5 text-white placeholder:text-gray-300 focus:outline-none"
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            required
+            value={form.password}
+            onChange={onChange}
+            className="w-full rounded-lg border border-gray-300 bg-transparent p-2.5 text-white placeholder:text-gray-300 focus:outline-none"
+          />
+        </div>
+
+        {error ? (
+          <p className="w-full rounded-lg border border-red-300/50 bg-red-500/15 px-3 py-2 text-center text-sm text-red-100">
+            {error}
+          </p>
+        ) : null}
+
         <button
-          disabled={loading}
-          className="w-full bg-amber-600 hover:bg-amber-700 text-white rounded-md py-2 disabled:opacity-70"
+          type="submit"
+          disabled={submitting}
+          className="rounded-2xl bg-[#f3a849] px-10 py-3 text-base font-semibold text-[#0d2a1b] transition-transform duration-200 hover:scale-105 hover:bg-[#e09330] disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {loading ? 'Signing in...' : 'Login'}
+          {submitting ? "Logging in..." : "Login"}
         </button>
       </form>
-    </main>
-  )
+    </div>
+  );
 }

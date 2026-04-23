@@ -1,14 +1,15 @@
 import { useMemo, useState } from 'react'
 import about1 from '../assets/banner/about1.jpeg'
 import { Link, useParams } from 'react-router-dom'
-import { products } from '../data/products.js'
 import { useOrder } from '../context/order.js'
+import { useContent } from '../context/content.js'
 import { formatRs } from '../utils/money.js'
 
 
 function ProductDetails() {
   const { id } = useParams()
-  const product = useMemo(() => products.find((p) => p.id === id), [id])
+  const { products, settings } = useContent()
+  const product = useMemo(() => products.find((p) => p.id === id), [id, products])
   const [qty, setQty] = useState(1)
   const [selectedVariant, setSelectedVariant] = useState(null)
   const [whatsappPromptOpen, setWhatsappPromptOpen] = useState(false)
@@ -49,7 +50,7 @@ function ProductDetails() {
         }
       })
       .filter(Boolean)
-  }, [order])
+  }, [order, products])
 
   const orderTotal = useMemo(() => {
     return detailed.reduce((sum, x) => sum + (x.price || 0) * x.qty, 0)
@@ -86,7 +87,8 @@ function ProductDetails() {
   }, [detailed, orderTotal, price, product, qty, totalPrice, activeVariant])
 
   const openWhatsApp = () => {
-    const url = `https://wa.me/923338399480?text=${encodeURIComponent(whatsappMessage)}`
+    const whatsappNumber = String(settings.whatsapp_number || '923338399480').replace(/[^\d]/g, '')
+    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`
     window.open(url, '_blank', 'noopener,noreferrer')
     setWhatsappPromptOpen(false)
   }

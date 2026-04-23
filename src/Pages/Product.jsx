@@ -1,42 +1,9 @@
 import { Link } from 'react-router-dom'
 import about1 from '../assets/banner/about1.jpeg'
-import honey2 from '../assets/images/honey2.jpg'
-import cow from '../assets/images/cow.png'
-import buffalo from '../assets/images/buffalo.png'
-import mockuphoney from '../assets/images/mockuphoney.png'
-import goat from '../assets/images/goat.png'
 import { FaRegStar, FaStar, FaStarHalfAlt } from 'react-icons/fa'
-import { FiCalendar, FiHeart, FiArrowRight } from 'react-icons/fi'
-import { products } from '../data/products.js'
 import { formatRs } from '../utils/money.js'
+import { useContent } from '../context/content.js'
 import '../App.css'
-
-const showcaseProducts = [
-  {
-    id: 'Raw-honey',
-    title: 'Pure Honey',
-    image: mockuphoney,
-    duration: 1000
-  },
-  {
-    id: 'Goat-Desi-Ghee',
-    title: 'Goat Desi Ghee',
-    image: goat,
-    duration: 2000
-  },
-  {
-    id: 'wildflower-honey',
-    title: 'Buffalo Ghee',
-    image: buffalo,
-    duration: 3000
-  },
-  {
-    id: 'queen-bee-honey',
-    title: 'Cow Desi Ghee',
-    image: cow,
-    duration: 4000
-  }
-]
 
 function getRatingStars(rating) {
   const safe = Math.max(0, Math.min(5, Number(rating) || 0))
@@ -51,6 +18,9 @@ function getRatingStars(rating) {
 }
 
 function Product() {
+  const { products } = useContent()
+  const showcaseProducts = products.slice(0, 4)
+
   return (
     <main className="productPage" aria-label="Product page">
       <section className="aboutHero" aria-label="About hero" style={{ backgroundImage: `url(${about1})` }}>
@@ -93,14 +63,14 @@ function Product() {
           </div>
 
           <div className="productShowcase__grid" aria-label="Product images">
-            {showcaseProducts.map((product) => (
+            {showcaseProducts.map((product, index) => (
               <Link 
                 key={product.id}
                 className="productShowcaseCard" 
                 to={`/product/${product.id}`} 
                 aria-label={`Open ${product.title}`} 
                 data-aos="flip-left" 
-                data-aos-duration={product.duration}
+                data-aos-duration={(index + 1) * 1000}
               >
                 <img className="productShowcaseCard__img" src={product.image} alt={product.title} loading="lazy" />
                 <div className="productShowcaseCard__overlay">

@@ -23,8 +23,8 @@ import team2 from '../assets/images/team2.jpg'
 import team3 from '../assets/images/team3.jpg'
 import newsletterLeft from '../assets/icons/icon.png'
 import newsletterRight from '../assets/icons/honey1.png'
-import { products } from '../data/products.js'
 import { formatRs } from '../utils/money.js'
+import { useContent } from '../context/content.js'
 import '../App.css'
 
 function useSlidesPerView() {
@@ -86,18 +86,43 @@ function getRatingStars(rating) {
 }
 
 function Home() {
+  const { products, heroSlides: apiHeroSlides, testimonials: apiTestimonials } = useContent()
   const slides = useMemo(
-    () => [
-      {
-        image: slider1,
-        title: ['FRESH', 'ORGANIC', 'HONEY'],
-      },
-      {
-        image: gheeslider,
-        title: ['PURE', 'NATURAL', 'DESI GHEE'],
-      },
-    ],
-    [],
+    () => {
+      if (Array.isArray(apiHeroSlides) && apiHeroSlides.length) {
+        return apiHeroSlides.map((slide) => {
+          const titleParts = Array.isArray(slide.title) ? slide.title : String(slide.title || '').split(' ')
+          const normalizedTitle = [
+            titleParts[0] || 'FRESH',
+            titleParts[1] || 'ORGANIC',
+            titleParts.slice(2).join(' ') || titleParts[2] || 'HONEY',
+          ]
+
+          return {
+            image: slide.image,
+            title: normalizedTitle,
+            buttonText: slide.buttonText || 'SHOP NOW',
+            buttonLink: slide.buttonLink || '/product',
+          }
+        })
+      }
+
+      return [
+        {
+          image: slider1,
+          title: ['FRESH', 'ORGANIC', 'HONEY'],
+          buttonText: 'SHOP NOW',
+          buttonLink: '/product',
+        },
+        {
+          image: gheeslider,
+          title: ['PURE', 'NATURAL', 'DESI GHEE'],
+          buttonText: 'SHOP NOW',
+          buttonLink: '/product',
+        },
+      ]
+    },
+    [apiHeroSlides],
   )
 
   const heroSlides = useMemo(() => {
@@ -173,8 +198,12 @@ function Home() {
     nextFrame(() => setLogoNoTransition(false))
   }, [slidesPerView])
 
-  const clients = useMemo(
-    () => [
+  const clients = useMemo(() => {
+    if (Array.isArray(apiTestimonials) && apiTestimonials.length) {
+      return apiTestimonials
+    }
+
+    return [
       {
         avatar: lalajan,
         name: 'Lala Jan',
@@ -207,9 +236,8 @@ function Home() {
           'The products arrived fresh and pure. Excellent service, quick delivery, and I will order again soon for sure.',
         rating: 5,
       },
-    ],
-    [],
-  )
+    ]
+  }, [apiTestimonials])
 
   const onNewsletterSubmit = (e) => {
     e.preventDefault()
@@ -297,8 +325,8 @@ function Home() {
               <span className="hero__honey">{active.title[2]}</span>
             </h1>
 
-            <Link className="hero__btn" to="/product" data-aos="fade-down" data-aos-duration="1000">
-              SHOP NOW
+            <Link className="hero__btn" to={active.buttonLink || '/product'} data-aos="fade-down" data-aos-duration="1000">
+              {active.buttonText || 'SHOP NOW'}
             </Link>
           </div>
 

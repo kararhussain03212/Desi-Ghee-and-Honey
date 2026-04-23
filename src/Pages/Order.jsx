@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FiTrash2 } from 'react-icons/fi'
-import { products } from '../data/products.js'
 import { useOrder } from '../context/order.js'
+import { useContent } from '../context/content.js'
 import { formatRs } from '../utils/money.js'
 import slide1 from '../assets/images/slide1.jpg'
 // import honeyL from '../assets/images/honeyL.png'
@@ -10,6 +10,7 @@ import icon2 from '../assets/images/icon2.png'
 
 
 function Order() {
+  const { products, settings } = useContent()
   const { order, orderCount, setOrderQty, removeFromOrder, clearOrder } = useOrder()
   const [whatsappPromptOpen, setWhatsappPromptOpen] = useState(false)
 
@@ -38,7 +39,7 @@ function Order() {
         }
       })
       .filter(Boolean)
-  }, [order])
+  }, [order, products])
 
   const totals = useMemo(() => {
     const subTotal = detailed.reduce((sum, x) => sum + (x.price || 0) * x.qty, 0)
@@ -63,7 +64,8 @@ function Order() {
   }, [detailed, totals.total])
 
   const openWhatsApp = () => {
-    const url = `https://wa.me/923338399480?text=${encodeURIComponent(whatsappMessage)}`
+    const whatsappNumber = String(settings.whatsapp_number || '923338399480').replace(/[^\d]/g, '')
+    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`
     window.open(url, '_blank', 'noopener,noreferrer')
     setWhatsappPromptOpen(false)
   }

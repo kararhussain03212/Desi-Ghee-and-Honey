@@ -1,155 +1,110 @@
-import { useQuery } from '@tanstack/react-query'
-import api from '../services/api'
-import useAuthStore from '../store/authStore'
-
-const moduleConfig = [
-  { key: 'services', label: 'Services', badge: 'Live' },
-  { key: 'products', label: 'Products', badge: 'Catalog' },
-  { key: 'team', label: 'Team Members', badge: 'People' },
-  { key: 'testimonials', label: 'Testimonials', badge: 'Reviews' },
-  { key: 'blog', label: 'Blogs', badge: 'Content' },
-  { key: 'hero', label: 'Hero Slides', badge: 'Hero' },
-  { key: 'gallery', label: 'Gallery', badge: 'Media' },
-  { key: 'stats', label: 'Stats', badge: 'Insights' },
-]
-
-const quickStats = [
-  { key: 'total', label: 'Total Entries', pill: 'Live' },
-  { key: 'active', label: 'Published', pill: 'Online' },
-  { key: 'pending', label: 'Pending Review', pill: 'Queue' },
-  { key: 'sections', label: 'Sections Available', pill: 'Modules' },
-]
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { getProducts } from "../api/productApi";
+import { getServices } from "../api/serviceApi";
+import { getSliders } from "../api/sliderApi";
 
 export default function Dashboard() {
-  const logout = useAuthStore((state) => state.logout)
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [stats, setStats] = useState({
+    sliders: 0,
+    services: 0,
+    products: 0,
+  });
 
-  const { data, isLoading, error, refetch, isFetching } = useQuery({
-    queryKey: ['dashboard'],
-    queryFn: async () => {
-      const response = await api.get('/admin/dashboard')
-      return response.data?.data
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const [slidersRes, servicesRes, productsRes] = await Promise.all([
+          getSliders(),
+          getServices(),
+          getProducts(),
+        ]);
+
+        const sliders = Array.isArray(slidersRes?.data?.data) ? slidersRes.data.data : [];
+        const services = Array.isArray(servicesRes?.data?.data) ? servicesRes.data.data : [];
+        const products = Array.isArray(productsRes?.data?.data) ? productsRes.data.data : [];
+
+        setStats({
+          sliders: sliders.length,
+          services: services.length,
+          products: products.length,
+        });
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load dashboard stats from backend.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const cards = [
+    {
+      title: "Sliders",
+      value: stats.sliders,
+      link: "/sliders",
+      cta: "Open Sliders",
     },
-  })
-
-  const counts = data?.counts || {}
-  const totalEntries = Object.values(counts).reduce((acc, value) => acc + Number(value || 0), 0)
-  const activeEntries = totalEntries
-  const pendingEntries = 0
-  const sectionCount = Object.keys(counts).length
-  const lastUpdated = new Date().toLocaleString()
-
-  const quickStatValues = {
-    total: totalEntries,
-    active: activeEntries,
-    pending: pendingEntries,
-    sections: sectionCount,
-  }
+    {
+      title: "Services",
+      value: stats.services,
+      link: "/services",
+      cta: "Open Services",
+    },
+    {
+      title: "Products",
+      value: stats.products,
+      link: "/products",
+      cta: "Open Products",
+    },
+    {
+      title: "Admin",
+      value: "Profile",
+      link: "/profile",
+      cta: "Open Admin",
+    },
+  ];
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="mx-auto flex w-full max-w-[1500px]">
-        <aside className="hidden min-h-screen w-64 border-r border-slate-800 bg-slate-950/90 p-5 lg:block">
-          <div className="mb-8 flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-lg bg-indigo-600/30 text-indigo-300">S</div>
-            <div>
-              <p className="text-xs uppercase tracking-widest text-slate-400">Admin Panel</p>
-              <h2 className="text-xl font-semibold">SWIFT</h2>
-            </div>
-          </div>
+    <section className="space-y-5">
+      <header className="rounded-2xl border border-[#f3a849]/30 bg-gradient-to-r from-[#0d2a1b] to-[#1a5e38] p-5 sm:p-6">
+        <h2 className="text-3xl font-bold text-white">Dashboard</h2>
+        <p className="mt-1 text-white/75">Quick summary of your admin content.</p>
+      </header>
 
-          <nav className="space-y-2 text-sm">
-            <p className="mb-2 text-xs uppercase tracking-widest text-slate-500">Main</p>
-            <button className="w-full rounded-lg bg-slate-800 px-3 py-2 text-left text-slate-100">Dashboard</button>
-            {moduleConfig.slice(0, 6).map((item) => (
-              <button key={item.key} className="w-full rounded-lg px-3 py-2 text-left text-slate-300 hover:bg-slate-900">
-                {item.label}
-              </button>
-            ))}
-            <p className="mb-2 mt-6 text-xs uppercase tracking-widest text-slate-500">Global</p>
-            {moduleConfig.slice(6).map((item) => (
-              <button key={item.key} className="w-full rounded-lg px-3 py-2 text-left text-slate-300 hover:bg-slate-900">
-                {item.label}
-              </button>
-            ))}
-          </nav>
-        </aside>
+      {error ? (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-300">
+          {error}
+        </div>
+      ) : null}
 
-        <section className="flex-1 p-4 md:p-6">
-          <header className="mb-6 rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-indigo-950 to-cyan-950 p-5 md:p-6">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <h1 className="text-2xl font-semibold md:text-3xl">Dashboard</h1>
-                <p className="mt-1 text-sm text-slate-300">Professional overview of your admin content health.</p>
-                <p className="mt-2 text-xs text-slate-400">Last updated: {lastUpdated}</p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => refetch()}
-                  className="rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-sm text-slate-100 hover:bg-slate-800 disabled:opacity-70"
-                  disabled={isFetching}
-                >
-                  {isFetching ? 'Refreshing...' : 'Refresh Data'}
-                </button>
-                <button onClick={logout} className="rounded-lg bg-indigo-600 px-3 py-2 text-sm text-white hover:bg-indigo-500">
-                  Logout
-                </button>
-              </div>
-            </div>
-          </header>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {cards.map((card) => (
+          <article
+            key={card.title}
+            className="rounded-2xl border border-[#f3a849]/25 bg-[#0d2a1b] p-5"
+          >
+            <p className="text-sm text-[#f3a849]">{card.title}</p>
+            <p className="mt-2 text-3xl font-bold text-white">
+              {loading ? "-" : card.value}
+            </p>
 
-          {isLoading ? <p className="mb-4 text-sm text-slate-300">Loading dashboard...</p> : null}
-          {error ? <p className="mb-4 text-sm text-rose-300">Failed to fetch dashboard data.</p> : null}
-
-          <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {quickStats.map((stat) => (
-              <article key={stat.key} className="rounded-2xl border border-slate-800 bg-slate-900/80 p-4">
-                <div className="mb-2 flex items-center justify-between">
-                  <p className="text-xs uppercase tracking-wider text-slate-400">{stat.label}</p>
-                  <span className="rounded-full border border-indigo-400/30 bg-indigo-500/10 px-2 py-0.5 text-[10px] text-indigo-300">
-                    {stat.pill}
-                  </span>
-                </div>
-                <p className="text-3xl font-semibold">{quickStatValues[stat.key]}</p>
-              </article>
-            ))}
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {moduleConfig.map((item) => {
-              const value = Number(counts[item.key] || 0)
-              const livePct = value > 0 ? 100 : 0
-              return (
-                <article key={item.key} className="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 to-slate-900/70 p-4">
-                  <div className="mb-3 flex items-center justify-between">
-                    <h3 className="text-base font-medium">{item.label}</h3>
-                    <span className="rounded-full border border-cyan-400/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] text-cyan-300">
-                      {item.badge}
-                    </span>
-                  </div>
-
-                  <div className="mb-2 flex items-end justify-between">
-                    <p className="text-3xl font-semibold">{value}</p>
-                    <p className="text-xs text-slate-400">{livePct}% live</p>
-                  </div>
-
-                  <div className="h-2 w-full rounded-full bg-slate-800">
-                    <div className="h-2 rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400" style={{ width: `${livePct}%` }} />
-                  </div>
-
-                  <div className="mt-3 flex gap-2">
-                    <button className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-800">
-                      Open Section
-                    </button>
-                    <button className="rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-800">
-                      Add New
-                    </button>
-                  </div>
-                </article>
-              )
-            })}
-          </div>
-        </section>
+            <Link
+              to={card.link}
+              className="mt-4 inline-flex rounded-lg border border-[#f3a849]/40 px-4 py-2 text-sm font-medium text-white/90 hover:bg-[#1f8b4c]/35"
+            >
+              {card.cta}
+            </Link>
+          </article>
+        ))}
       </div>
-    </main>
-  )
+    </section>
+  );
 }
