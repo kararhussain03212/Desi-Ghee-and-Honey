@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: Poppins, system-ui, sans-serif;
+  background: #faf7f1;
+  color: #1c1917;
+}
+
+a {
+  color: inherit;
+}
