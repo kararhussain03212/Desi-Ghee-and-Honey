@@ -40,6 +40,7 @@ final class AuthMiddleware
             'id' => (int) ($payload['sub'] ?? 0),
             'email' => (string) ($payload['email'] ?? ''),
             'name' => (string) ($payload['name'] ?? ''),
+            'role' => (string) ($payload['role'] ?? 'editor'),
             'csrf' => (string) ($payload['csrf'] ?? ''),
         ];
     }

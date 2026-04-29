@@ -34,6 +34,11 @@ abstract class BaseController
         return $user['id'] ?? null;
     }
 
+    protected function currentAdmin(): ?array
+    {
+        return AuthMiddleware::user();
+    }
+
     protected function slugify(string $value): string
     {
         $value = strtolower(trim($value));

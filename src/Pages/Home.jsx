@@ -2,23 +2,14 @@ import { useEffect, useMemo, useState } from 'react'
 import { FiArrowRight, FiChevronLeft, FiChevronRight, FiCheck } from 'react-icons/fi'
 import { FaRegStar, FaStar, FaStarHalfAlt } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
-import slider1 from '../assets/Slide image/slider.jpeg'
-import gheeslider from '../assets/Slide image/gheeslider.jpeg'
-import aboutImg from '../assets/images/about1.png'
-import cow from '../assets/images/cow.png'
 import cowicon from '../assets/icons/cowicon.png'
 import goaticon from '../assets/icons/goaticon.png'
 import buffaloicon from '../assets/icons/buffaloicon.png'
 import guee from '../assets/icons/guee.png'
-import ghee from '../assets/images/ghee.png'
-import lalajan from '../assets/images/lalajan.jpeg'
-import saeed from '../assets/images/saeed.jpg'
-import team2 from '../assets/images/team2.jpg'
-import team3 from '../assets/images/team3.jpg'
 import newsletterRight from '../assets/icons/honey1.png'
 import { formatRs } from '../utils/money.js'
 import { useContent } from '../context/content.js'
-import { getSettingJson, getSettingText } from '../utils/siteSettings.js'
+import { getSettingJson, getSettingText, isSectionActive } from '../utils/siteSettings.js'
 import '../App.css'
 
 function useSlidesPerView() {
@@ -81,6 +72,9 @@ function getRatingStars(rating) {
 
 function Home() {
   const { products, heroSlides: apiHeroSlides, testimonials: apiTestimonials, settings } = useContent()
+  const homeAboutActive = isSectionActive(settings, 'home_about', true)
+  const homeCompanyActive = isSectionActive(settings, 'home_company', true)
+  const homeOfferActive = isSectionActive(settings, 'home_offer', true)
   const backendBase = (import.meta.env.VITE_BACKEND_URL || 'http://localhost/honey-ghee/backend').replace(/\/$/, '')
   const toAssetUrl = (path, fallback) => {
     if (!path) return fallback
@@ -97,36 +91,11 @@ function Home() {
   )
   const aboutButtonText = getSettingText(settings, 'home_about_button_text', 'Read more')
   const aboutButtonLink = getSettingText(settings, 'home_about_button_link', '/about')
-  const aboutImage = toAssetUrl(getSettingText(settings, 'home_about_image', ''), aboutImg)
+  const aboutImage = toAssetUrl(getSettingText(settings, 'home_about_image', ''), '')
   const aboutPropertiesTitle = getSettingText(settings, 'home_about_properties_title', 'Useful Properties Of Honey & Desi Ghee')
-  const aboutProperties = getSettingJson(settings, 'home_about_properties', [
-    'Supports Healthy Metabolism',
-    'Boosts Natural Immunity',
-    'Improves Blood Health',
-    'Promotes Better Sleep',
-    'Provides Natural Energy & Strength',
-  ])
+  const aboutProperties = getSettingJson(settings, 'home_about_properties', [])
 
-  const gheeCards = getSettingJson(settings, 'home_ghee_cards', [
-    {
-      icon: 'cow',
-      title: 'Cow Desi Ghee',
-      description:
-        'Cow Desi Ghee is made from pure cow milk using traditional methods. Rich in healthy fats, vitamins, and natural nutrients, it supports digestion, boosts energy, and promotes overall health naturally.',
-    },
-    {
-      icon: 'goat',
-      title: 'Goat Desi Ghee',
-      description:
-        'Goat Desi Ghee is pure, traditional ghee made from fresh goat milk using natural methods. It has a rich aroma, smooth texture, and authentic taste.',
-    },
-    {
-      icon: 'buffalo',
-      title: 'Buffalo Desi Ghee',
-      description:
-        'Buffalo Desi Ghee is pure, traditional ghee made from high-quality buffalo milk using natural methods. It has a rich aroma, thick texture, and strong authentic flavor.',
-    },
-  ])
+  const gheeCards = getSettingJson(settings, 'home_ghee_cards', [])
 
   const aboutCompanyKicker = getSettingText(settings, 'home_company_kicker', 'About our Company')
   const aboutCompanyTitle = getSettingText(settings, 'home_company_title', 'Cow Desi Ghee')
@@ -137,7 +106,7 @@ function Home() {
     'home_company_text',
     'Our Pure Cow Desi Ghee is made from 100% natural and fresh cow milk, ensuring premium quality and rich taste. Prepared using traditional methods, this ghee is completely pure, chemical-free, and full of natural aroma and flavor.',
   )
-  const aboutCompanyImage = toAssetUrl(getSettingText(settings, 'home_company_image', ''), cow)
+  const aboutCompanyImage = toAssetUrl(getSettingText(settings, 'home_company_image', ''), '')
   const aboutCompanyButtonText = getSettingText(settings, 'home_company_button_text', 'MORE ABOUT')
   const aboutCompanyButtonLink = getSettingText(settings, 'home_company_button_link', '/about')
 
@@ -157,7 +126,7 @@ function Home() {
   )
   const offerButtonText = getSettingText(settings, 'home_offer_button_text', 'SHOP NOW')
   const offerButtonLink = getSettingText(settings, 'home_offer_button_link', '/product')
-  const offerImage = toAssetUrl(getSettingText(settings, 'home_offer_image', ''), ghee)
+  const offerImage = toAssetUrl(getSettingText(settings, 'home_offer_image', ''), '')
 
   const clientsTitle = getSettingText(settings, 'home_testimonials_title', 'What Our Clients Say')
   const clientsDescription = getSettingText(
@@ -177,40 +146,17 @@ function Home() {
   const newsletterSuccessText = getSettingText(settings, 'home_newsletter_success', 'Thanks! You are subscribed.')
   const newsletterErrorText = getSettingText(settings, 'home_newsletter_error', 'Please enter a valid email address.')
 
-  const slides = useMemo(() => {
-    if (Array.isArray(apiHeroSlides) && apiHeroSlides.length) {
-      return apiHeroSlides.map((slide) => {
-        const titleParts = Array.isArray(slide.title) ? slide.title : String(slide.title || '').split(' ')
-        const normalizedTitle = [
-          titleParts[0] || 'FRESH',
-          titleParts[1] || 'ORGANIC',
-          titleParts.slice(2).join(' ') || titleParts[2] || 'HONEY',
-        ]
-
-        return {
-          image: slide.image,
-          title: normalizedTitle,
-          buttonText: slide.buttonText || 'SHOP NOW',
-          buttonLink: slide.buttonLink || '/product',
-        }
-      })
-    }
-
-    return [
-      {
-        image: slider1,
-        title: ['FRESH', 'ORGANIC', 'HONEY'],
-        buttonText: 'SHOP NOW',
-        buttonLink: '/product',
-      },
-      {
-        image: gheeslider,
-        title: ['PURE', 'NATURAL', 'DESI GHEE'],
-        buttonText: 'SHOP NOW',
-        buttonLink: '/product',
-      },
-    ]
-  }, [apiHeroSlides])
+  const slides = useMemo(
+    () =>
+      (Array.isArray(apiHeroSlides) ? apiHeroSlides : []).map((slide) => ({
+        image: slide.image,
+        title: String(slide.title || '').trim(),
+        subtitle: String(slide.subtitle || '').trim(),
+        buttonText: slide.buttonText || 'SHOP NOW',
+        buttonLink: slide.buttonLink || '/product',
+      })),
+    [apiHeroSlides],
+  )
 
   const heroSlides = useMemo(() => {
     if (!slides.length) return []
@@ -255,47 +201,26 @@ function Home() {
 
   const realIndex = slides.length ? ((index - 1 + slides.length) % slides.length) : 0
   const active = slides[realIndex]
+  const heroTitleLines = String(active?.title || '')
+    .split(/\r?\n|[|]/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+
+  const getHeroLineClass = (idx, total) => {
+    if (total === 1) return 'hero__honey'
+    if (total === 2) return idx === 0 ? 'hero__organic' : 'hero__honey'
+    return idx % 3 === 0 ? 'hero__fresh' : idx % 3 === 1 ? 'hero__organic' : 'hero__honey'
+  }
+  const safeSrc = (value) => {
+    const normalized = String(value || '').trim()
+    return normalized || undefined
+  }
 
   const slidesPerView = useSlidesPerView()
   const [newsletterEmail, setNewsletterEmail] = useState('')
   const [newsletterStatus, setNewsletterStatus] = useState('idle')
 
-  const clients = useMemo(() => {
-    if (Array.isArray(apiTestimonials) && apiTestimonials.length) {
-      return apiTestimonials
-    }
-
-    return [
-      {
-        avatar: lalajan,
-        name: 'Lala Jan',
-        role: 'Verified Customer',
-        review: "This honey is absolutely pure and natural. I've been my family and the taste is incredible. Highly recommended!",
-        rating: 5,
-      },
-      {
-        avatar: saeed,
-        name: 'Saeed Ali',
-        role: 'Verified Customer',
-        review: "The desi ghee from this company is the best. It's 100% natural and helps with my daily cooking. Worth every rupee!",
-        rating: 5,
-      },
-      {
-        avatar: team2,
-        name: 'Ayesha Ahmed',
-        role: 'Verified Customer',
-        review: 'I love the quality and purity of the products. Great customer service and fast delivery. Definitely ordering again!',
-        rating: 5,
-      },
-      {
-        avatar: team3,
-        name: 'Fatima Khan',
-        role: 'Verified Customer',
-        review: 'The products arrived fresh and pure. Excellent service, quick delivery, and I will order again soon for sure.',
-        rating: 5,
-      },
-    ]
-  }, [apiTestimonials])
+  const clients = useMemo(() => (Array.isArray(apiTestimonials) ? apiTestimonials : []), [apiTestimonials])
 
   const onNewsletterSubmit = (e) => {
     e.preventDefault()
@@ -369,10 +294,17 @@ function Home() {
               data-aos="fade-right"
               data-aos-duration="1000"
             >
-              <span className="hero__fresh">{active?.title?.[0] || ''}</span>
-              <span className="hero__organic">{active?.title?.[1] || ''}</span>
-              <span className="hero__honey">{active?.title?.[2] || ''}</span>
+              {heroTitleLines.map((line, idx) => (
+                <span key={`${line}-${idx}`} className={getHeroLineClass(idx, heroTitleLines.length)}>
+                  {line}
+                </span>
+              ))}
             </h1>
+            {active?.subtitle ? (
+              <p className="mt-3 max-w-xl text-base text-white/85" data-aos="fade-right" data-aos-duration="1000">
+                {active.subtitle}
+              </p>
+            ) : null}
 
             <Link className="hero__btn" to={active?.buttonLink || '/product'} data-aos="fade-down" data-aos-duration="1000">
               {active?.buttonText || 'SHOP NOW'}
@@ -403,6 +335,7 @@ function Home() {
         </div>
       </section>
 
+      {homeAboutActive ? (
       <section className="aboutHoneySection" aria-label="About Honey and Desi Ghee">
         <div className="aboutHoneyGrid">
           <div className="aboutHoneyLeft">
@@ -420,7 +353,9 @@ function Home() {
           </div>
 
           <div className="aboutHoneyMedia">
-            <img className="aboutHoneyImg" src={aboutImage} alt="Honey and desi ghee" loading="lazy" data-aos="fade-down" data-aos-easing="linear" data-aos-duration="1000" />
+            {aboutImage ? (
+              <img className="aboutHoneyImg" src={aboutImage} alt="Honey and desi ghee" loading="lazy" data-aos="fade-down" data-aos-easing="linear" data-aos-duration="1000" />
+            ) : null}
           </div>
 
           <div className="aboutHoneyRight">
@@ -438,7 +373,9 @@ function Home() {
           </div>
         </div>
       </section>
+      ) : null}
 
+      {homeAboutActive ? (
       <section className="categoryCardsSection" aria-label="Honey cards">
         <div className="categoryCardsGrid">
           {gheeCards.map((card, index) => {
@@ -449,7 +386,7 @@ function Home() {
             return (
               <article key={`${card.title}-${index}`} className="categoryCard" data-aos={aosByIndex} data-aos-duration="1000">
                 <div className="categoryCardIcon">
-                  <img src={iconSrc} alt="" />
+                  <img src={safeSrc(iconSrc)} alt="" />
                 </div>
                 <h3 className="categoryCardTitle">{card.title}</h3>
                 <p className="categoryCardDesc">{card.description}</p>
@@ -458,12 +395,16 @@ function Home() {
           })}
         </div>
       </section>
+      ) : null}
 
+      {homeCompanyActive ? (
       <section className="aboutCompanySection" id="company" aria-label="About our company">
         <div className="aboutCompanyGrid">
           <div className="aboutCompanyMedia">
             <div className="aboutCompanyImageWrap">
-              <img className="aboutCompanyImage" src={aboutCompanyImage} alt="Desi ghee" data-aos="zoom-out-up" data-aos-duration="1000" />
+              {aboutCompanyImage ? (
+                <img className="aboutCompanyImage" src={aboutCompanyImage} alt="Desi ghee" data-aos="zoom-out-up" data-aos-duration="1000" />
+              ) : null}
             </div>
           </div>
 
@@ -483,7 +424,9 @@ function Home() {
           </div>
         </div>
       </section>
+      ) : null}
 
+      {homeCompanyActive ? (
       <section className="productsSection" id="shop" aria-label="Fresh honey products">
         <div className="productsInner">
           <h2 className="productsTitle" data-aos="fade-down" data-aos-duration="1000">{productsSectionTitle}</h2>
@@ -494,7 +437,7 @@ function Home() {
               <article key={p.id} className="productCard" data-aos="flip-left" data-aos-duration="2000">
                 <div className="productMedia">
                   <Link className="productLink" to={`/product/${p.id}`} aria-label={`Open ${p.title}`}>
-                    <img className="productImg" src={p.image} alt={p.title} loading="lazy" />
+                    <img className="productImg" src={safeSrc(p.image)} alt={p.title} loading="lazy" />
                   </Link>
                   <span className="productBadge" aria-label={p.badge}>{p.badge}</span>
                 </div>
@@ -531,12 +474,16 @@ function Home() {
           </div>
         </div>
       </section>
+      ) : null}
 
+      {homeOfferActive ? (
       <section className="offerSection" id="offers" aria-label="Limited offer">
         <div className="offerInner">
           <div className="offerMedia">
             <div className="offerFrame" aria-hidden="true" />
-            <img className="offerImage" src={offerImage} alt="Ghee" loading="lazy" data-aos="zoom-in" data-aos-duration="1000" />
+            {offerImage ? (
+              <img className="offerImage" src={offerImage} alt="Ghee" loading="lazy" data-aos="zoom-in" data-aos-duration="1000" />
+            ) : null}
           </div>
 
           <div className="offerContent">
@@ -554,7 +501,9 @@ function Home() {
           </div>
         </div>
       </section>
+      ) : null}
 
+      {homeOfferActive ? (
       <section className="clientsSection" aria-label="Our clients testimonials">
         <div className="clientsInner">
           <h2 className="clientsTitle" data-aos="fade-down" data-aos-duration="1000">{clientsTitle}</h2>
@@ -577,7 +526,7 @@ function Home() {
                   <article className="clientCard">
                     <div className="clientInfo">
                       <div className="clientAvatar">
-                        <img src={c.avatar} alt={`${c.name} avatar`} loading="lazy" />
+                        <img src={safeSrc(c.avatar)} alt={`${c.name} avatar`} loading="lazy" />
                       </div>
                       <div>
                         <h4 className="clientName">{c.name}</h4>
@@ -603,7 +552,9 @@ function Home() {
           </div>
         </div>
       </section>
+      ) : null}
 
+      {homeOfferActive ? (
       <section className="newsletterSection" aria-label="Newsletter subscription">
         <div className="newsletterCard">
           <div className="newsletterDecor newsletterDecor--left" aria-hidden="true">
@@ -644,6 +595,7 @@ function Home() {
           </div>
         </div>
       </section>
+      ) : null}
     </main>
   )
 }

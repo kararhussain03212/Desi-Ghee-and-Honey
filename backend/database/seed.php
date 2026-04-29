@@ -3,8 +3,12 @@
 declare(strict_types=1);
 
 use Backend\Config\Database;
+use Backend\Config\Env;
 
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/env.php';
+
+Env::load(dirname(__DIR__) . '/.env');
 
 $pdo = Database::connection();
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -361,22 +365,38 @@ function insertStats(PDO $pdo, array $stats): void
 
 function createDefaultAdmin(PDO $pdo): void
 {
-    $passwordA = password_hash('Admin@123', PASSWORD_BCRYPT);
-    $passwordB = password_hash('admin123', PASSWORD_BCRYPT);
+    $adminLogin = trim((string) Env::get('ADMIN_LOGIN', 'admin'));
+    $adminEmail = trim((string) Env::get('ADMIN_EMAIL', 'admin@example.com'));
+    $adminPassword = trim((string) Env::get('ADMIN_PASSWORD', 'admin123'));
 
-    $stmt = $pdo->prepare('INSERT INTO admins (name, email, password_hash, status, created_at, updated_at) VALUES (:name, :email, :password_hash, :status, NOW(), NOW())');
+    if ($adminLogin === '') {
+        $adminLogin = 'admin';
+    }
+    if ($adminEmail === '' || !filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) {
+        $adminEmail = 'admin@example.com';
+    }
+    if (strlen($adminPassword) < 6) {
+        $adminPassword = 'admin123';
+    }
+
+    $passwordA = password_hash($adminPassword, PASSWORD_BCRYPT);
+    $passwordB = password_hash('Admin@123', PASSWORD_BCRYPT);
+
+    $stmt = $pdo->prepare('INSERT INTO admins (name, email, password_hash, role, status, created_at, updated_at) VALUES (:name, :email, :password_hash, :role, :status, NOW(), NOW())');
 
     $stmt->execute([
-        ':name' => 'admin',
-        ':email' => 'admin@swiftsign.com',
+        ':name' => $adminLogin,
+        ':email' => strtolower($adminEmail),
         ':password_hash' => $passwordA,
+        ':role' => 'admin',
         ':status' => 'active',
     ]);
 
     $stmt->execute([
         ':name' => 'admin',
-        ':email' => 'admin@example.com',
+        ':email' => 'admin@swiftsign.com',
         ':password_hash' => $passwordB,
+        ':role' => 'admin',
         ':status' => 'active',
     ]);
 }

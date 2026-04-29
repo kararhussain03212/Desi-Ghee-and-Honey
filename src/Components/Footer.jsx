@@ -4,7 +4,7 @@ import { GiHoneyJar } from 'react-icons/gi'
 import { FaFacebookF, FaInstagram, FaTiktok } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 import { useContent } from '../context/content.js'
-import { getSettingJson, getSettingText } from '../utils/siteSettings.js'
+import { getSettingJson, getSettingText, isSectionActive } from '../utils/siteSettings.js'
 
 function Footer() {
   const [showTop, setShowTop] = useState(false)
@@ -23,9 +23,22 @@ function Footer() {
     'footer_description',
     'SwiftSign General Trading includes a broad range of activities, defined by expertise and industry practices',
   )
-  const contactAddress = getSettingText(settings, 'contact_address', 'I-8 Markaz, Islamabad, Pakistan')
-  const contactPhone = getSettingText(settings, 'contact_phone', '+92 333 8399480')
-  const contactEmail = getSettingText(settings, 'contact_email', 'info@swiftsigngeneraltrading.com')
+  const footerContactTitle = getSettingText(settings, 'footer_contact_title', 'CONTACT')
+  const contactAddress = getSettingText(
+    settings,
+    'footer_contact_address',
+    getSettingText(settings, 'contact_location_text', getSettingText(settings, 'contact_address', 'I-8 Markaz, Islamabad, Pakistan')),
+  )
+  const contactPhone = getSettingText(
+    settings,
+    'footer_contact_phone',
+    getSettingText(settings, 'contact_phone_text', getSettingText(settings, 'contact_phone', '+92 333 8399480')),
+  )
+  const contactEmail = getSettingText(
+    settings,
+    'footer_contact_email',
+    getSettingText(settings, 'contact_email_text', getSettingText(settings, 'contact_email', 'info@swiftsigngeneraltrading.com')),
+  )
   const footerAccountTitle = getSettingText(settings, 'footer_account_title', 'MY ACCOUNT')
   const footerNewsletterTitle = getSettingText(settings, 'footer_newsletter_title', 'NEWSLETTER')
   const footerNewsletterDescription = getSettingText(
@@ -43,6 +56,12 @@ function Footer() {
     { label: 'Product', path: '/product' },
     { label: 'Contact', path: '/contact' },
   ])
+  const filteredFooterLinks = footerLinks.filter((item) => {
+    if (item.path === '/about') return isSectionActive(settings, 'about', true)
+    if (item.path === '/product') return isSectionActive(settings, 'product', true)
+    if (item.path === '/contact') return isSectionActive(settings, 'contact', true)
+    return true
+  })
 
   const footerSocials = getSettingJson(settings, 'footer_social_links', [
     { label: 'Facebook', url: '#', icon: 'facebook' },
@@ -96,7 +115,7 @@ function Footer() {
           </div>
 
           <div className="footer__col">
-            <h3 className="footer__heading">CONTACT</h3>
+            <h3 className="footer__heading">{footerContactTitle}</h3>
             <ul className="footer__list">
               <li className="footer__item">
                 <FiMapPin aria-hidden="true" /> {contactAddress}
@@ -113,7 +132,7 @@ function Footer() {
           <div className="footer__col">
             <h3 className="footer__heading">{footerAccountTitle}</h3>
             <ul className="footer__links">
-              {footerLinks.map((item) => (
+              {filteredFooterLinks.map((item) => (
                 <li key={`${item.path}-${item.label}`}>
                   <Link to={item.path}>{item.label}</Link>
                 </li>

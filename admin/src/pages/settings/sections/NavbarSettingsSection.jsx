@@ -25,6 +25,16 @@ export default function NavbarSettingsSection({
         />
       </div>
 
+      <div className="grid grid-cols-1 gap-2 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-elevated)] p-3 md:grid-cols-[280px_1fr] md:items-start">
+        <label className="pt-2 text-sm font-semibold text-[var(--admin-ink)]">Cart Icon</label>
+        <ImageUpload
+          value={toImageUrl(form.nav_cart_icon)}
+          onFileSelect={(file) => uploadToSetting("nav_cart_icon", file, "icons")}
+          label="Upload Cart Icon"
+          helperText="Optional. If empty, default cart icon is used."
+        />
+      </div>
+
       <div className="space-y-3 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-elevated)] p-4">
         <h4 className="text-sm font-semibold text-[var(--admin-ink)]">Navbar Links</h4>
         {navLinks.map((item, index) => (

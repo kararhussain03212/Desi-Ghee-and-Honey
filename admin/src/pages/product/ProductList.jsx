@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { deleteProduct, getProducts, updateProduct } from "../../api/productApi";
+import { useAuth } from "../../context/useAuth";
+import { normalizeUserRole } from "../../modules/users/constants";
 
 const PRODUCT_FALLBACK_IMAGE = `data:image/svg+xml;utf8,${encodeURIComponent(
   "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 600'><rect width='900' height='600' fill='#171717'/><text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle' fill='#ffffff' font-family='Arial,sans-serif' font-size='48'>Product</text></svg>",
@@ -8,9 +10,26 @@ const PRODUCT_FALLBACK_IMAGE = `data:image/svg+xml;utf8,${encodeURIComponent(
 
 export default function ProductList() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [toast, setToast] = useState({ show: false, text: "" });
+
+  const isAdmin = normalizeUserRole(user?.role) === "admin";
+  const permissions = Array.isArray(user?.permissions) ? user.permissions : [];
+  const canAdd = isAdmin || permissions.includes("add_data");
+  const canEdit = isAdmin || permissions.includes("edit_data");
+  const canDelete = isAdmin || permissions.includes("delete_data");
+  const canPublish = isAdmin || permissions.includes("publish_data");
+
+  const showNoPerm = (action) => setToast({ show: true, text: `You do not have permission to ${action}.` });
+
+  useEffect(() => {
+    if (!toast.show) return;
+    const t = setTimeout(() => setToast({ show: false, text: "" }), 2200);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   const apiRoot = useMemo(() => {
     const base = import.meta.env.VITE_API_URL || "";
@@ -44,6 +63,10 @@ export default function ProductList() {
   }, []);
 
   const handleDelete = async (id) => {
+    if (!canDelete) {
+      showNoPerm("delete products");
+      return;
+    }
     if (!window.confirm("Delete this product?")) return;
     try {
       await deleteProduct(id);
@@ -55,6 +78,10 @@ export default function ProductList() {
   };
 
   const handleToggleActive = async (item) => {
+    if (!canPublish) {
+      showNoPerm("publish products");
+      return;
+    }
     try {
       const nextStatus = item.status === "active" ? "inactive" : "active";
       const { data } = await updateProduct(item.id, { status: nextStatus });
@@ -86,13 +113,20 @@ export default function ProductList() {
             Manage products shown on website.
           </p>
         </div>
-        <Link
-          to="/products/new"
+        <button
+          type="button"
+          onClick={() => (canAdd ? navigate("/products/new") : showNoPerm("add products"))}
           className="inline-flex w-fit rounded-xl bg-[var(--admin-primary)] px-5 py-2.5 text-black hover:bg-[var(--admin-primary-strong)]"
         >
           + Add Product
-        </Link>
+        </button>
       </header>
+
+      {toast.show ? (
+        <div className="fixed right-5 top-5 z-[220] rounded-xl border border-red-400/30 bg-red-500/90 px-4 py-2 text-sm font-medium text-white shadow-lg">
+          {toast.text}
+        </div>
+      ) : null}
 
       {error ? (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-300">
@@ -159,12 +193,13 @@ export default function ProductList() {
                       >
                         {item.status === "active" ? "Active" : "Inactive"}
                       </button>
-                      <Link
-                        to={`/products/edit/${item.id}`}
-                        className="rounded-lg bg-[#1f8b4c] px-4 py-2 text-sm text-white hover:bg-[var(--admin-primary-strong)]"
+                      <button
+                        type="button"
+                        onClick={() => (canEdit ? navigate(`/products/edit/${item.id}`) : showNoPerm("edit products"))}
+                        className={`rounded-lg px-4 py-2 text-sm ${canEdit ? "bg-[#1f8b4c] text-white hover:bg-[var(--admin-primary-strong)]" : "border border-white/20 bg-white/10 text-white/60"}`}
                       >
                         Edit
-                      </Link>
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleDelete(item.id)}

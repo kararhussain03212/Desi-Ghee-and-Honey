@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useOrder } from '../context/order.js'
 import { useContent } from '../context/content.js'
-import { getSettingJson, getSettingText } from '../utils/siteSettings.js'
+import { getSettingJson, getSettingText, isSectionActive } from '../utils/siteSettings.js'
 import "../App.css"
 
 
@@ -29,8 +29,14 @@ function NavBar() {
     { label: 'Product', path: '/product' },
     { label: 'Contact', path: '/contact' },
   ])
+  const filteredNavLinks = navLinks.filter((item) => {
+    if (item.path === '/about') return isSectionActive(settings, 'about', true)
+    if (item.path === '/product') return isSectionActive(settings, 'product', true)
+    if (item.path === '/contact') return isSectionActive(settings, 'contact', true)
+    return true
+  })
   const cartPath = getSettingText(settings, 'nav_cart_path', '/order')
-  const cartLabel = getSettingText(settings, 'nav_cart_label', 'Cart')
+  const cartIcon = getSettingText(settings, 'nav_cart_icon', '')
 
   const handleMenuClose = () => {
     setMobileMenuOpen(false)
@@ -55,7 +61,7 @@ function NavBar() {
         </Link>
 
         <nav className="navbar__nav" aria-label="Primary">
-          {navLinks.map((item) => (
+          {filteredNavLinks.map((item) => (
             <Link
               key={`${item.path}-${item.label}`}
               className={`navbar__link ${isActive(item.path) ? 'navbar__link--active' : ''}`}
@@ -64,8 +70,12 @@ function NavBar() {
               {item.label}
             </Link>
           ))}
-          <Link className={`navbar__link navbar__link--shop ${isActive(cartPath) ? 'navbar__link--active' : ''}`} to={cartPath} aria-label={cartLabel}>
-            <FiShoppingCart className="navbar__shopIcon" aria-hidden="true" />
+          <Link className={`navbar__link navbar__link--shop ${isActive(cartPath) ? 'navbar__link--active' : ''}`} to={cartPath} aria-label="Cart">
+            {cartIcon ? (
+              <img src={toAssetUrl(cartIcon)} alt="Cart" className="navbar__shopIcon" />
+            ) : (
+              <FiShoppingCart className="navbar__shopIcon" aria-hidden="true" />
+            )}
             {orderCount > 0 && <span className="navbar__badge">{orderCount}</span>}
           </Link>
         </nav>
@@ -82,7 +92,7 @@ function NavBar() {
 
       {mobileMenuOpen && (
         <nav className="navbar__mobile" aria-label="Mobile menu">
-          {navLinks.map((item) => (
+          {filteredNavLinks.map((item) => (
             <Link
               key={`mobile-${item.path}-${item.label}`}
               className={`navbar__mobileLink ${isActive(item.path) ? 'navbar__mobileLink--active' : ''}`}
@@ -92,8 +102,12 @@ function NavBar() {
               {item.label}
             </Link>
           ))}
-          <Link className={`navbar__mobileLink ${isActive(cartPath) ? 'navbar__mobileLink--active' : ''}`} to={cartPath} onClick={handleMenuClose} aria-label={cartLabel}>
-            <FiShoppingCart className="navbar__shopIcon" aria-hidden="true" />
+          <Link className={`navbar__mobileLink ${isActive(cartPath) ? 'navbar__mobileLink--active' : ''}`} to={cartPath} onClick={handleMenuClose} aria-label="Cart">
+            {cartIcon ? (
+              <img src={toAssetUrl(cartIcon)} alt="Cart" className="navbar__shopIcon" />
+            ) : (
+              <FiShoppingCart className="navbar__shopIcon" aria-hidden="true" />
+            )}
             {orderCount > 0 && <span className="navbar__badge">{orderCount}</span>}
           </Link>
         </nav>

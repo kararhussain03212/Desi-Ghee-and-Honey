@@ -12,7 +12,7 @@ const getInitialForm = () => ({
   price: "",
   oldPrice: "",
   rating: "5",
-  variantsJson: "[]",
+  variants: [{ label: "", price: "" }],
   orderPosition: 0,
   status: "active",
   imageFile: null,
@@ -70,7 +70,15 @@ export default function ProductForm() {
           price: String(item.price ?? ""),
           oldPrice: item.old_price == null ? "" : String(item.old_price),
           rating: String(item.rating ?? "5"),
-          variantsJson: item.variants_json || "[]",
+          variants: (() => {
+            const rows = parseVariants(item.variants_json)
+              .map((variant) => ({
+                label: String(variant?.label || "").trim(),
+                price: String(variant?.price ?? ""),
+              }))
+              .filter((variant) => variant.label || variant.price);
+            return rows.length ? rows : [{ label: "", price: "" }];
+          })(),
           orderPosition: Number(item.order_position || 0),
           status: item.status === "inactive" ? "inactive" : "active",
           imageFile: null,
@@ -116,6 +124,13 @@ export default function ProductForm() {
         imagePath = form.imagePreview.replace(apiRoot, "");
       }
 
+      const normalizedVariants = form.variants
+        .map((variant) => ({
+          label: String(variant.label || "").trim(),
+          price: Number(variant.price || 0),
+        }))
+        .filter((variant) => variant.label && Number.isFinite(variant.price) && variant.price >= 0);
+
       const payload = {
         title: form.title.trim(),
         description: form.description.trim(),
@@ -124,7 +139,7 @@ export default function ProductForm() {
         price: Number(form.price || 0),
         old_price: form.oldPrice === "" ? null : Number(form.oldPrice),
         rating: Number(form.rating || 5),
-        variants_json: form.variantsJson.trim() || "[]",
+        variants_json: JSON.stringify(normalizedVariants),
         order_position: Number(form.orderPosition || 0),
         status: form.status === "inactive" ? "inactive" : "active",
       };
@@ -250,13 +265,59 @@ export default function ProductForm() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm text-white/80">Variants JSON</label>
-            <input
-              value={form.variantsJson}
-              onChange={(e) => setField("variantsJson", e.target.value)}
-              placeholder='[{"label":"250g","price":1200}]'
-              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
-            />
+            <label className="mb-1 block text-sm text-white/80">Variants</label>
+            <div className="space-y-2 rounded-lg border border-white/20 bg-[var(--admin-card)] p-3">
+              {form.variants.map((variant, index) => (
+                <div key={`variant-${index}`} className="grid grid-cols-1 gap-2 md:grid-cols-[1fr_140px_auto]">
+                  <input
+                    value={variant.label}
+                    onChange={(e) =>
+                      setField(
+                        "variants",
+                        form.variants.map((item, i) => (i === index ? { ...item, label: e.target.value } : item)),
+                      )
+                    }
+                    placeholder="1kg"
+                    className="w-full rounded-lg border border-white/20 bg-[var(--admin-bg)] px-3 py-2 text-white"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={variant.price}
+                    onChange={(e) =>
+                      setField(
+                        "variants",
+                        form.variants.map((item, i) => (i === index ? { ...item, price: e.target.value } : item)),
+                      )
+                    }
+                    placeholder="3600"
+                    className="w-full rounded-lg border border-white/20 bg-[var(--admin-bg)] px-3 py-2 text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setField(
+                        "variants",
+                        form.variants.length > 1
+                          ? form.variants.filter((_, i) => i !== index)
+                          : [{ label: "", price: "" }],
+                      )
+                    }
+                    className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-red-300"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => setField("variants", [...form.variants, { label: "", price: "" }])}
+                className="rounded-lg border border-[var(--admin-border-amber)] bg-[var(--admin-primary)]/15 px-3 py-2 text-sm font-semibold text-[var(--admin-primary)]"
+              >
+                + Add Variant
+              </button>
+            </div>
           </div>
         </div>
 
@@ -311,3 +372,22 @@ export default function ProductForm() {
     </section>
   );
 }
+  const decodeHtmlEntities = (value) =>
+    String(value ?? "")
+      .replaceAll("&amp;", "&")
+      .replaceAll("&lt;", "<")
+      .replaceAll("&gt;", ">")
+      .replaceAll("&quot;", '"')
+      .replaceAll("&#039;", "'");
+
+  const parseVariants = (value) => {
+    if (Array.isArray(value)) return value;
+    const raw = decodeHtmlEntities(value);
+    if (!raw.trim()) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };

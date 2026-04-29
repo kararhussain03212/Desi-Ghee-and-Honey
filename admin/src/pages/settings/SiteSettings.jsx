@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { uploadImage } from "../../api/uploadApi";
 import { getSettings, updateSettings } from "../../api/settingApi";
 import NavbarSettingsSection from "./sections/NavbarSettingsSection";
@@ -8,12 +8,16 @@ import HomeOfferSettingsSection from "./sections/HomeOfferSettingsSection";
 import FooterSettingsSection from "./sections/FooterSettingsSection";
 import ProductSettingsSection from "./sections/ProductSettingsSection";
 import ContactSettingsSection from "./sections/ContactSettingsSection";
+import AboutSettingsSection from "./sections/AboutSettingsSection";
 
 const textFieldConfig = [
   { key: "site_brand_text", section: "navbar" },
-  { key: "nav_cart_label", section: "navbar" },
   { key: "nav_cart_path", section: "navbar" },
+  { key: "nav_cart_icon", section: "navbar" },
   { key: "nav_logo", section: "navbar" },
+  { key: "topbar_left_text", section: "navbar" },
+  { key: "topbar_right_title", section: "navbar" },
+  { key: "topbar_contact_prefix", section: "navbar" },
   { key: "home_about_kicker", section: "home.about" },
   { key: "home_about_title", section: "home.about" },
   { key: "home_about_description", section: "home.about" },
@@ -47,6 +51,10 @@ const textFieldConfig = [
   { key: "home_newsletter_error", section: "home.offer" },
   { key: "footer_logo", section: "footer" },
   { key: "footer_description", section: "footer" },
+  { key: "footer_contact_title", section: "footer" },
+  { key: "footer_contact_address", section: "footer" },
+  { key: "footer_contact_phone", section: "footer" },
+  { key: "footer_contact_email", section: "footer" },
   { key: "footer_account_title", section: "footer" },
   { key: "footer_newsletter_title", section: "footer" },
   { key: "footer_newsletter_description", section: "footer" },
@@ -82,16 +90,39 @@ const textFieldConfig = [
   { key: "contact_map_title", section: "contact" },
   { key: "whatsapp_number", section: "contact" },
   { key: "whatsapp_tooltip", section: "contact" },
+  { key: "about_page_hero_image", section: "about" },
+  { key: "about_page_title", section: "about" },
+  { key: "about_page_breadcrumb_home", section: "about" },
+  { key: "about_page_breadcrumb_current", section: "about" },
+  { key: "about_page_info_kicker", section: "about" },
+  { key: "about_page_info_title", section: "about" },
+  { key: "about_page_info_description", section: "about" },
+  { key: "about_page_info_image", section: "about" },
+  { key: "about_page_properties_title", section: "about" },
+  { key: "about_page_company_kicker", section: "about" },
+  { key: "about_page_company_title", section: "about" },
+  { key: "about_page_company_accent", section: "about" },
+  { key: "about_page_company_suffix", section: "about" },
+  { key: "about_page_company_description", section: "about" },
+  { key: "about_page_company_image", section: "about" },
+  { key: "about_page_category_title", section: "about" },
+  { key: "about_page_category_description", section: "about" },
+  { key: "about_page_category_image", section: "about" },
 ];
 
 const imageSettingKeys = new Set([
   "nav_logo",
+  "nav_cart_icon",
   "footer_logo",
   "product_page_hero_image",
   "contact_page_hero_image",
   "home_about_image",
   "home_company_image",
   "home_offer_image",
+  "about_page_hero_image",
+  "about_page_info_image",
+  "about_page_company_image",
+  "about_page_category_image",
 ]);
 
 const createEmptyTextForm = () =>
@@ -123,29 +154,41 @@ const toLabel = (key) =>
     .replaceAll("_", " ")
     .replace(/\b\w/g, (m) => m.toUpperCase());
 
-export default function SiteSettings({ forcedMainSection = "", forcedHomeSection = "" }) {
+const defaultSectionStatus = {
+  navbar: "active",
+  home_about: "active",
+  home_company: "active",
+  home_offer: "active",
+  footer: "active",
+  product: "active",
+  contact: "active",
+  about: "active",
+};
+
+export default function SiteSettings({ forcedMainSection = "", forcedHomeSection = "", forcedAboutSection = "" }) {
   const [activeMainSection, setActiveMainSection] = useState(forcedMainSection || "navbar");
   const [activeHomeSection, setActiveHomeSection] = useState(forcedHomeSection || "about");
+  const [activeAboutSection, setActiveAboutSection] = useState(forcedAboutSection || "hero");
   const [form, setForm] = useState(createEmptyTextForm);
   const [navLinks, setNavLinks] = useState([{ label: "", path: "" }]);
   const [aboutProperties, setAboutProperties] = useState([""]);
   const [gheeCards, setGheeCards] = useState([{ icon: "cow", icon_url: "", title: "", description: "" }]);
   const [footerLinks, setFooterLinks] = useState([{ label: "", path: "" }]);
   const [footerSocialLinks, setFooterSocialLinks] = useState([{ label: "", url: "", icon: "facebook" }]);
+  const [aboutPageProperties, setAboutPageProperties] = useState([""]);
+  const [aboutPageCategories, setAboutPageCategories] = useState([
+    { icon: "", icon_url: "", title: "", description: "" },
+  ]);
+  const [aboutPageProcessCards, setAboutPageProcessCards] = useState([
+    { icon_url: "", title: "", description: "" },
+  ]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingStatus, setSavingStatus] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [sectionStatus, setSectionStatus] = useState({
-    navbar: "active",
-    home_about: "active",
-    home_company: "active",
-    home_offer: "active",
-    footer: "active",
-    product: "active",
-    contact: "active",
-  });
+  const [sectionStatus, setSectionStatus] = useState(defaultSectionStatus);
 
   const apiRoot = useMemo(() => {
     const base = import.meta.env.VITE_API_URL || "";
@@ -167,12 +210,20 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
     if (activeMainSection === "footer") return "Footer Settings";
     if (activeMainSection === "product") return "Product Page Settings";
     if (activeMainSection === "contact") return "Contact & WhatsApp Settings";
+    if (activeMainSection === "about") {
+      if (activeAboutSection === "hero") return "About - Hero Settings";
+      if (activeAboutSection === "info") return "About - Info Settings";
+      if (activeAboutSection === "company") return "About - Company Settings";
+      if (activeAboutSection === "category") return "About - Category Settings";
+      if (activeAboutSection === "process") return "About - Process Settings";
+      return "About Page Settings";
+    }
     return "Site Settings";
-  }, [activeHomeSection, activeMainSection]);
+  }, [activeAboutSection, activeHomeSection, activeMainSection]);
 
   const currentStatusKey = useMemo(() => {
     if (activeMainSection === "home") return `home_${activeHomeSection}`;
-    if (["navbar", "footer", "product", "contact"].includes(activeMainSection)) return activeMainSection;
+    if (["navbar", "footer", "product", "contact", "about"].includes(activeMainSection)) return activeMainSection;
     return "navbar";
   }, [activeHomeSection, activeMainSection]);
 
@@ -187,7 +238,12 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
   useEffect(() => {
     if (forcedMainSection) setActiveMainSection(forcedMainSection);
     if (forcedHomeSection) setActiveHomeSection(forcedHomeSection);
-  }, [forcedHomeSection, forcedMainSection]);
+    if (forcedAboutSection) setActiveAboutSection(forcedAboutSection);
+  }, [forcedAboutSection, forcedHomeSection, forcedMainSection]);
+
+  useEffect(() => {
+    if (success) setSuccess("");
+  }, [activeMainSection, activeHomeSection, activeAboutSection]);
 
   useEffect(() => {
     const load = async () => {
@@ -203,7 +259,10 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
         let nextGheeCards = [{ icon: "cow", icon_url: "", title: "", description: "" }];
         let nextFooterLinks = [{ label: "", path: "" }];
         let nextFooterSocialLinks = [{ label: "", url: "", icon: "facebook" }];
-        const nextSectionStatus = { ...sectionStatus };
+        let nextAboutPageProperties = [""];
+        let nextAboutPageCategories = [{ icon: "", icon_url: "", title: "", description: "" }];
+        let nextAboutPageProcessCards = [{ icon_url: "", title: "", description: "" }];
+        const nextSectionStatus = { ...defaultSectionStatus };
 
         rows.forEach((row) => {
           const key = String(row?.setting_key || "").trim();
@@ -268,6 +327,40 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
             return;
           }
 
+          if (key === "about_page_properties") {
+            const parsed = parseJsonArray(rawValue, []);
+            const normalized = parsed.map((item) => String(item || "")).filter(Boolean);
+            if (normalized.length) nextAboutPageProperties = normalized;
+            return;
+          }
+
+          if (key === "about_page_categories") {
+            const parsed = parseJsonArray(rawValue, []);
+            const normalized = parsed
+              .map((item) => ({
+                icon: String(item?.icon || ""),
+                icon_url: String(item?.icon_url || ""),
+                title: String(item?.title || ""),
+                description: String(item?.description || ""),
+              }))
+              .filter((item) => item.title || item.description || item.icon_url || item.icon);
+            if (normalized.length) nextAboutPageCategories = normalized;
+            return;
+          }
+
+          if (key === "about_page_process_cards") {
+            const parsed = parseJsonArray(rawValue, []);
+            const normalized = parsed
+              .map((item) => ({
+                icon_url: String(item?.icon_url || ""),
+                title: String(item?.title || ""),
+                description: String(item?.description || ""),
+              }))
+              .filter((item) => item.title || item.description || item.icon_url);
+            if (normalized.length) nextAboutPageProcessCards = normalized;
+            return;
+          }
+
           if (Object.prototype.hasOwnProperty.call(next, key)) next[key] = String(rawValue);
         });
 
@@ -277,6 +370,9 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
         setGheeCards(nextGheeCards);
         setFooterLinks(nextFooterLinks);
         setFooterSocialLinks(nextFooterSocialLinks);
+        setAboutPageProperties(nextAboutPageProperties);
+        setAboutPageCategories(nextAboutPageCategories);
+        setAboutPageProcessCards(nextAboutPageProcessCards);
         setSectionStatus(nextSectionStatus);
       } catch (err) {
         console.error(err);
@@ -324,7 +420,39 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
     }
   };
 
-  const handleSave = async () => {
+  const uploadAboutCategoryIcon = async (index, file) => {
+    try {
+      setUploading(true);
+      const path = await uploadImage(file, "icons");
+      if (!path) return;
+      setAboutPageCategories((prev) =>
+        prev.map((item, i) => (i === index ? { ...item, icon_url: path } : item)),
+      );
+    } catch (err) {
+      console.error(err);
+      setError("Icon upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const uploadAboutProcessIcon = async (index, file) => {
+    try {
+      setUploading(true);
+      const path = await uploadImage(file, "icons");
+      if (!path) return;
+      setAboutPageProcessCards((prev) =>
+        prev.map((item, i) => (i === index ? { ...item, icon_url: path } : item)),
+      );
+    } catch (err) {
+      console.error(err);
+      setError("Icon upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSave = useCallback(async () => {
     setSaving(true);
     setError("");
     setSuccess("");
@@ -366,6 +494,28 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
           }))
           .filter((item) => item.label && item.url),
       );
+      payload.about_page_properties = JSON.stringify(
+        aboutPageProperties.map((item) => String(item || "").trim()).filter(Boolean),
+      );
+      payload.about_page_categories = JSON.stringify(
+        aboutPageCategories
+          .map((item) => ({
+            icon: String(item.icon || "").trim(),
+            icon_url: String(item.icon_url || "").trim(),
+            title: String(item.title || "").trim(),
+            description: String(item.description || "").trim(),
+          }))
+          .filter((item) => item.title || item.description || item.icon_url || item.icon),
+      );
+      payload.about_page_process_cards = JSON.stringify(
+        aboutPageProcessCards
+          .map((item) => ({
+            icon_url: String(item.icon_url || "").trim(),
+            title: String(item.title || "").trim(),
+            description: String(item.description || "").trim(),
+          }))
+          .filter((item) => item.title || item.description || item.icon_url),
+      );
       Object.entries(sectionStatus).forEach(([statusKey, statusValue]) => {
         payload[`section_status_${statusKey}`] = statusValue;
       });
@@ -378,6 +528,39 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
     } finally {
       setSaving(false);
     }
+  }, [
+    form,
+    navLinks,
+    aboutProperties,
+    gheeCards,
+    footerLinks,
+    footerSocialLinks,
+    aboutPageProperties,
+    aboutPageCategories,
+    aboutPageProcessCards,
+    sectionStatus,
+  ]);
+
+  const updateCurrentSectionStatus = async (nextStatus) => {
+    const normalized = nextStatus === "inactive" ? "inactive" : "active";
+    const statusSettingKey = `section_status_${currentStatusKey}`;
+    const previousStatus = sectionStatus[currentStatusKey] === "inactive" ? "inactive" : "active";
+
+    setSectionStatus((prev) => ({ ...prev, [currentStatusKey]: normalized }));
+    setSavingStatus(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      await updateSettings({ [statusSettingKey]: normalized });
+      setSuccess("Section status updated successfully.");
+    } catch (err) {
+      console.error(err);
+      setError(err?.response?.data?.message || "Failed to update section status.");
+      setSectionStatus((prev) => ({ ...prev, [currentStatusKey]: previousStatus }));
+    } finally {
+      setSavingStatus(false);
+    }
   };
 
   useEffect(() => {
@@ -389,7 +572,21 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [loading, saving, uploading, form, navLinks, aboutProperties, gheeCards, footerLinks, footerSocialLinks]);
+  }, [
+    loading,
+    saving,
+    uploading,
+    form,
+    navLinks,
+    aboutProperties,
+    gheeCards,
+    footerLinks,
+    footerSocialLinks,
+    aboutPageProperties,
+    aboutPageCategories,
+    aboutPageProcessCards,
+    handleSave,
+  ]);
 
   if (loading) return <p className="text-white/70">Loading settings...</p>;
 
@@ -407,23 +604,25 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setSectionStatus((prev) => ({ ...prev, [currentStatusKey]: "active" }))}
+              onClick={() => updateCurrentSectionStatus("active")}
               className={
                 sectionStatus[currentStatusKey] === "active"
                   ? "rounded-lg border border-[var(--admin-accent)] bg-[var(--admin-accent)] px-3 py-1.5 text-sm font-semibold text-black"
                   : "rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg-deep)] px-3 py-1.5 text-sm font-semibold text-[var(--admin-muted)] hover:bg-[var(--admin-card-elevated)]"
               }
+              disabled={savingStatus}
             >
               Active
             </button>
             <button
               type="button"
-              onClick={() => setSectionStatus((prev) => ({ ...prev, [currentStatusKey]: "inactive" }))}
+              onClick={() => updateCurrentSectionStatus("inactive")}
               className={
                 sectionStatus[currentStatusKey] === "inactive"
                   ? "rounded-lg border border-red-900 bg-red-900 px-3 py-1.5 text-sm font-semibold text-red-200"
                   : "rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg-deep)] px-3 py-1.5 text-sm font-semibold text-[var(--admin-muted)] hover:bg-[var(--admin-card-elevated)]"
               }
+              disabled={savingStatus}
             >
               Inactive
             </button>
@@ -524,6 +723,26 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
             toLabel={toLabel}
             toImageUrl={toImageUrl}
             uploadToSetting={uploadToSetting}
+          />
+        ) : null}
+
+        {activeMainSection === "about" ? (
+          <AboutSettingsSection
+            fieldKeys={getKeysFor("about")}
+            form={form}
+            setField={setField}
+            toLabel={toLabel}
+            toImageUrl={toImageUrl}
+            uploadToSetting={uploadToSetting}
+            aboutPageProperties={aboutPageProperties}
+            setAboutPageProperties={setAboutPageProperties}
+            aboutPageCategories={aboutPageCategories}
+            setAboutPageCategories={setAboutPageCategories}
+            aboutPageProcessCards={aboutPageProcessCards}
+            setAboutPageProcessCards={setAboutPageProcessCards}
+            uploadAboutCategoryIcon={uploadAboutCategoryIcon}
+            uploadAboutProcessIcon={uploadAboutProcessIcon}
+            activeAboutSection={activeAboutSection}
           />
         ) : null}
       </article>

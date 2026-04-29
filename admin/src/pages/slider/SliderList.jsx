@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { deleteSlider, getSliders, updateSlider } from "../../api/sliderApi";
+import { useAuth } from "../../context/useAuth";
+import { normalizeUserRole } from "../../modules/users/constants";
 
 const FALLBACK_IMAGE = `data:image/svg+xml;utf8,${encodeURIComponent(
   "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 700'><rect width='1200' height='700' fill='#171717'/><text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle' fill='#ffffff' font-family='Arial,sans-serif' font-size='58'>Slider</text></svg>",
@@ -8,9 +10,26 @@ const FALLBACK_IMAGE = `data:image/svg+xml;utf8,${encodeURIComponent(
 
 export default function SliderList() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [sliders, setSliders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [toast, setToast] = useState({ show: false, text: "" });
+
+  const isAdmin = normalizeUserRole(user?.role) === "admin";
+  const permissions = Array.isArray(user?.permissions) ? user.permissions : [];
+  const canAdd = isAdmin || permissions.includes("add_data");
+  const canEdit = isAdmin || permissions.includes("edit_data");
+  const canDelete = isAdmin || permissions.includes("delete_data");
+  const canPublish = isAdmin || permissions.includes("publish_data");
+
+  const showNoPerm = (action) => setToast({ show: true, text: `You do not have permission to ${action}.` });
+
+  useEffect(() => {
+    if (!toast.show) return;
+    const t = setTimeout(() => setToast({ show: false, text: "" }), 2200);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   const apiRoot = useMemo(() => {
     const base = import.meta.env.VITE_API_URL || "";
@@ -42,6 +61,10 @@ export default function SliderList() {
   }, []);
 
   const handleDelete = async (id) => {
+    if (!canDelete) {
+      showNoPerm("delete sliders");
+      return;
+    }
     if (!window.confirm("Delete this slider?")) return;
     try {
       await deleteSlider(id);
@@ -53,6 +76,10 @@ export default function SliderList() {
   };
 
   const handleToggleActive = async (item) => {
+    if (!canPublish) {
+      showNoPerm("publish sliders");
+      return;
+    }
     try {
       const nextStatus = item.status === "active" ? "inactive" : "active";
       const { data } = await updateSlider(item.id, { status: nextStatus });
@@ -82,13 +109,20 @@ export default function SliderList() {
           <h2 className="text-3xl font-bold text-white">Sliders</h2>
           <p className="text-sm text-white/65">Manage hero sliders on website home page.</p>
         </div>
-        <Link
-          to="/sliders/new"
+        <button
+          type="button"
+          onClick={() => (canAdd ? navigate("/sliders/new") : showNoPerm("add sliders"))}
           className="inline-flex w-fit rounded-xl bg-[var(--admin-primary)] px-5 py-2.5 text-black hover:bg-[var(--admin-primary-strong)]"
         >
           + Add Slider
-        </Link>
+        </button>
       </header>
+
+      {toast.show ? (
+        <div className="fixed right-5 top-5 z-[220] rounded-xl border border-red-400/30 bg-red-500/90 px-4 py-2 text-sm font-medium text-white shadow-lg">
+          {toast.text}
+        </div>
+      ) : null}
 
       {error ? (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-300">
@@ -154,12 +188,13 @@ export default function SliderList() {
                       >
                         {item.status === "active" ? "Active" : "Inactive"}
                       </button>
-                      <Link
-                        to={`/sliders/edit/${item.id}`}
-                        className="rounded-lg bg-[#1f8b4c] px-4 py-2 text-sm text-white hover:bg-[var(--admin-primary-strong)]"
+                      <button
+                        type="button"
+                        onClick={() => (canEdit ? navigate(`/sliders/edit/${item.id}`) : showNoPerm("edit sliders"))}
+                        className={`rounded-lg px-4 py-2 text-sm ${canEdit ? "bg-[#1f8b4c] text-white hover:bg-[var(--admin-primary-strong)]" : "border border-white/20 bg-white/10 text-white/60"}`}
                       >
                         Edit
-                      </Link>
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleDelete(item.id)}

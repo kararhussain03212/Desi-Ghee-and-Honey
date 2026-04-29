@@ -5,7 +5,9 @@ import { createSlider, getSlider, updateSlider } from "../../api/sliderApi";
 import { uploadImage } from "../../api/uploadApi";
 
 const getInitialForm = () => ({
-  title: "",
+  titleLine1: "",
+  titleLine2: "",
+  titleLine3: "",
   subtitle: "",
   buttonText: "",
   buttonLink: "/product",
@@ -57,9 +59,15 @@ export default function SliderForm() {
       try {
         const res = await getSlider(id);
         const item = res.data?.data || {};
+        const titleLines = String(item.title || "")
+          .split(/\r?\n|\|/)
+          .map((line) => line.trim())
+          .filter(Boolean);
 
         setForm({
-          title: item.title || "",
+          titleLine1: titleLines[0] || "",
+          titleLine2: titleLines[1] || "",
+          titleLine3: titleLines[2] || "",
           subtitle: item.subtitle || "",
           buttonText: item.button_text || "Shop Now",
           buttonLink: item.button_link || "/product",
@@ -83,8 +91,8 @@ export default function SliderForm() {
     e.preventDefault();
     setError("");
 
-    if (!form.title.trim()) {
-      setError("Slider title is required.");
+    if (!form.titleLine1.trim() && !form.titleLine2.trim() && !form.titleLine3.trim()) {
+      setError("At least one title line is required.");
       return;
     }
     if (!isEditMode && !form.imageFile) {
@@ -102,8 +110,13 @@ export default function SliderForm() {
         imagePath = form.imagePreview.replace(apiRoot, "");
       }
 
+      const mergedTitle = [form.titleLine1, form.titleLine2, form.titleLine3]
+        .map((line) => String(line || "").trim())
+        .filter(Boolean)
+        .join("\n");
+
       const payload = {
-        title: form.title.trim(),
+        title: mergedTitle,
         subtitle: form.subtitle.trim(),
         button_text: form.buttonText.trim() || "Shop Now",
         button_link: form.buttonLink.trim() || "/product",
@@ -153,14 +166,34 @@ export default function SliderForm() {
         className="space-y-5 rounded-2xl border border-white/10 bg-[var(--admin-bg)] p-6"
       >
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div>
-            <label className="mb-1 block text-sm text-white/80">Title</label>
-            <input
-              value={form.title}
-              onChange={(e) => setField("title", e.target.value)}
-              required
-              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
-            />
+          <div className="space-y-3">
+            <div>
+              <label className="mb-1 block text-sm text-white/80">Title Line 1 (Top)</label>
+              <input
+                value={form.titleLine1}
+                onChange={(e) => setField("titleLine1", e.target.value)}
+                placeholder="ORGANIC"
+                className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm text-white/80">Title Line 2 (Middle)</label>
+              <input
+                value={form.titleLine2}
+                onChange={(e) => setField("titleLine2", e.target.value)}
+                placeholder="HONEY"
+                className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm text-white/80">Title Line 3 (Bottom - Optional)</label>
+              <input
+                value={form.titleLine3}
+                onChange={(e) => setField("titleLine3", e.target.value)}
+                placeholder="DESI GHEE"
+                className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
+              />
+            </div>
           </div>
           <div>
             <label className="mb-1 block text-sm text-white/80">Button Text</label>

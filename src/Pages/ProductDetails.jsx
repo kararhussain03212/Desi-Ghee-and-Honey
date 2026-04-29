@@ -205,13 +205,9 @@ function ProductDetails() {
                   type="button"
                   className="pdActionBtn pdActionBtn--ghost"
                   onClick={() => {
-                    if (product.variants?.length) {
-                      const variantLabel = activeVariant?.label || '1kg'
-                      const variantId = `${product.id}__${variantLabel}`
-                      removeFromOrder(variantId)
-                    } else {
-                      removeFromOrder(product.id)
-                    }
+                    order
+                      .filter((item) => String(item.id || '').startsWith(`${product.id}__`) || String(item.id) === String(product.id))
+                      .forEach((item) => removeFromOrder(item.id))
                   }}
                 >
                   Remove

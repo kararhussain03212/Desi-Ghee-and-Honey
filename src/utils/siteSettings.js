@@ -31,3 +31,9 @@ export function toWhatsAppDigits(input, fallback = '923338399480') {
   const digits = String(input || '').replace(/[^\d]/g, '')
   return digits || fallback
 }
+
+export function isSectionActive(settings, sectionKey, fallback = true) {
+  const key = `section_status_${sectionKey}`
+  const status = getSettingText(settings, key, fallback ? 'active' : 'inactive')
+  return String(status).trim().toLowerCase() !== 'inactive'
+}

@@ -9,7 +9,7 @@ require_once __DIR__ . '/BaseModel.php';
 final class Admin extends BaseModel
 {
     protected string $table = 'admins';
-    protected array $fillable = ['name', 'email', 'password_hash', 'status', 'last_login_at'];
+    protected array $fillable = ['name', 'email', 'password_hash', 'role', 'status', 'designation', 'phone', 'location', 'bio', 'profile_photo', 'permissions_json', 'last_login_at'];
 
     public function findByLogin(string $login): ?array
     {
@@ -24,6 +24,15 @@ final class Admin extends BaseModel
             $stmt->execute([':name' => $login]);
         }
 
+        $row = $stmt->fetch();
+
+        return $row !== false ? $row : null;
+    }
+
+    public function findByEmail(string $email): ?array
+    {
+        $stmt = $this->pdo->prepare('SELECT * FROM admins WHERE email = :email LIMIT 1');
+        $stmt->execute([':email' => strtolower(trim($email))]);
         $row = $stmt->fetch();
 
         return $row !== false ? $row : null;

@@ -1,14 +1,20 @@
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { FiMail, FiMapPin, FiPhone } from 'react-icons/fi'
 import { useState } from 'react'
 import about1 from '../assets/banner/about1.jpeg'
 import { useContent } from '../context/content.js'
-import { getSettingText, toWhatsAppDigits } from '../utils/siteSettings.js'
+import { getSettingText, isSectionActive, toWhatsAppDigits } from '../utils/siteSettings.js'
 
 
 
 function Contact() {
   const { settings } = useContent()
+  const contactActive = isSectionActive(settings, 'contact', true)
+
+  if (!contactActive) {
+    return <Navigate to="/" replace />
+  }
+
   const backendBase = (import.meta.env.VITE_BACKEND_URL || 'http://localhost/honey-ghee/backend').replace(/\/$/, '')
   const toAssetUrl = (path, fallback) => {
     if (!path) return fallback

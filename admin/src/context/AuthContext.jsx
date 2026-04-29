@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import AuthContext from "./authContext";
-import { loginApi, meApi } from "../api/authApi";
+import { changePasswordApi, loginApi, meApi, updateProfileApi } from "../api/authApi";
 
 const ADMIN_ID = String(import.meta.env.VITE_ADMIN_ID || "").trim();
 const TOKEN_KEY = "token";
@@ -34,8 +34,9 @@ const normalizeRole = (value) => {
   const role = String(value || "")
     .trim()
     .toLowerCase();
-  if (role === "super_admin") return "super_admin";
-  if (role === "admin") return "editor";
+  if (role === "super_admin") return "admin";
+  if (role === "admin") return "admin";
+  if (role === "") return "admin";
   return "editor";
 };
 
@@ -92,7 +93,7 @@ const getDefaultSuperAdmin = () => ({
   id: ADMIN_ID || SUPER_ADMIN_EMAIL || "super-admin",
   name: "Super Admin",
   email: SUPER_ADMIN_EMAIL,
-  role: "super_admin",
+  role: "admin",
 });
 
 const sanitizeUsers = (inputUsers) => {
@@ -104,7 +105,7 @@ const sanitizeUsers = (inputUsers) => {
       const email = normalizeEmail(row.email);
       const role =
         email === SUPER_ADMIN_EMAIL || row.isAdmin === true
-          ? "super_admin"
+          ? "admin"
           : normalizeRole(row.role);
 
       return {
@@ -112,17 +113,21 @@ const sanitizeUsers = (inputUsers) => {
         name: String(row.name || "").trim() || "Admin User",
         email,
         role,
+        designation: String(row.designation || "").trim(),
+        bio: String(row.bio || "").trim(),
+        profile_photo: String(row.profile_photo || "").trim(),
+        permissions: Array.isArray(row.permissions) ? row.permissions : [],
       };
     });
 
   const preferredSuperAdmin =
     mapped.find((u) => u.email === SUPER_ADMIN_EMAIL) ??
-    mapped.find((u) => u.role === "super_admin") ??
+    mapped.find((u) => u.role === "admin") ??
     getDefaultSuperAdmin();
 
   const superAdmin = {
     ...preferredSuperAdmin,
-    role: "super_admin",
+    role: "admin",
     email: preferredSuperAdmin.email || SUPER_ADMIN_EMAIL,
     name: preferredSuperAdmin.name || "Super Admin",
     id: preferredSuperAdmin.id || ADMIN_ID || "super-admin",
@@ -135,7 +140,7 @@ const sanitizeUsers = (inputUsers) => {
 
   const editors = [];
   mapped.forEach((item) => {
-    if (normalizeRole(item.role) === "super_admin") return;
+    if (normalizeRole(item.role) === "admin" && normalizeEmail(item.email) === normalizeEmail(superAdmin.email)) return;
 
     const idKey = `id:${item.id}`;
     const emailKey = `email:${normalizeEmail(item.email)}`;
@@ -189,15 +194,18 @@ export function AuthProvider({ children }) {
       id: String(me.id),
       name: me.name || user?.name || "Admin",
       email: normalizeEmail(me.email || user?.email || SUPER_ADMIN_EMAIL),
-      role:
-        user?.role ||
-        (normalizeEmail(me.email) === SUPER_ADMIN_EMAIL
-          ? "super_admin"
-          : "editor"),
+      role: normalizeRole(me.role || user?.role || (normalizeEmail(me.email) === SUPER_ADMIN_EMAIL ? "admin" : "editor")),
+      designation: String(me.designation || user?.designation || "").trim(),
+      bio: String(me.bio || user?.bio || "").trim(),
+      profile_photo: String(me.profile_photo || user?.profile_photo || "").trim(),
+      status: String(me.status || user?.status || "active").trim(),
+      permissions: Array.isArray(me.permissions) ? me.permissions : (Array.isArray(user?.permissions) ? user.permissions : []),
     };
 
     const sanitized = sanitizeUsers([normalizedMe]);
     setUsers(sanitized);
+    setUser((prev) => ({ ...(prev || {}), ...normalizedMe }));
+    localStorage.setItem(AUTH_USER_KEY, JSON.stringify({ ...(user || {}), ...normalizedMe }));
     return sanitized;
   };
 
@@ -242,13 +250,18 @@ export function AuthProvider({ children }) {
         payload?.admin?.email || data?.admin?.email || data?.email || loginEmail,
       );
       const sessionRole =
-        backendEmail === SUPER_ADMIN_EMAIL ? "super_admin" : "editor";
+        normalizeRole(payload?.admin?.role || data?.admin?.role || (backendEmail === SUPER_ADMIN_EMAIL ? "admin" : "admin"));
 
       const sessionUser = {
         id: backendUserId || backendEmail,
         name: payload?.admin?.name || data?.admin?.name || data?.name || "Admin",
         email: backendEmail,
         role: sessionRole,
+        designation: "",
+        bio: "",
+        profile_photo: "",
+        status: String(payload?.admin?.status || data?.admin?.status || "active"),
+        permissions: Array.isArray(payload?.admin?.permissions) ? payload.admin.permissions : [],
       };
 
       localStorage.setItem(TOKEN_KEY, nextToken);
@@ -271,7 +284,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const updateProfile = ({ name, email }) => {
+  const updateProfile = async ({ name, email, designation = "", bio = "", profile_photo = "" }) => {
     if (!user?.id) {
       throw new Error("Not authenticated");
     }
@@ -283,10 +296,24 @@ export function AuthProvider({ children }) {
       throw new Error("Name is required");
     }
 
-    const nextSessionUser = {
-      ...user,
+    const { data } = await updateProfileApi({
       name: nextName,
       email: nextEmail || user.email,
+      designation: String(designation || "").trim(),
+      bio: String(bio || "").trim(),
+      profile_photo: String(profile_photo || "").trim(),
+    });
+
+    const payload = data?.data || {};
+    const nextSessionUser = {
+      ...user,
+      name: payload.name || nextName,
+      email: payload.email || nextEmail || user.email,
+      role: normalizeRole(payload.role || user.role),
+      designation: String(payload.designation || "").trim(),
+      bio: String(payload.bio || "").trim(),
+      profile_photo: String(payload.profile_photo || "").trim(),
+      status: String(payload.status || user.status || "active"),
     };
 
     setUser(nextSessionUser);
@@ -317,11 +344,14 @@ export function AuthProvider({ children }) {
       throw new Error("New password must be at least 6 characters");
     }
 
-    throw new Error("Password change endpoint is not available in this backend yet.");
+    await changePasswordApi({
+      current_password: current,
+      new_password: next,
+    });
   };
 
   const createUser = async ({ name, email, password }) => {
-    if (normalizeRole(user?.role) !== "super_admin") {
+    if (normalizeRole(user?.role) !== "admin") {
       throw new Error("Only super admin can create accounts");
     }
 
@@ -345,7 +375,7 @@ export function AuthProvider({ children }) {
   };
 
   const deleteUser = async (targetId) => {
-    if (normalizeRole(user?.role) !== "super_admin") {
+    if (normalizeRole(user?.role) !== "admin") {
       throw new Error("Only super admin can delete accounts");
     }
 

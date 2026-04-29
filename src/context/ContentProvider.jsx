@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ContentContext } from './content.js'
-import { products as fallbackProducts } from '../data/products.js'
 import {
   fetchPublicHeroSlides,
   fetchPublicProducts,
@@ -9,7 +8,7 @@ import {
 } from '../services/contentApi.js'
 
 export function ContentProvider({ children }) {
-  const [products, setProducts] = useState(fallbackProducts)
+  const [products, setProducts] = useState([])
   const [heroSlides, setHeroSlides] = useState([])
   const [testimonials, setTestimonials] = useState([])
   const [settings, setSettings] = useState({})
@@ -31,23 +30,20 @@ export function ContentProvider({ children }) {
 
         if (!isMounted) return
 
-        if (Array.isArray(productsData) && productsData.length) {
-          setProducts(productsData)
-        }
+        if (Array.isArray(productsData)) setProducts(productsData)
 
-        if (Array.isArray(heroData) && heroData.length) {
-          setHeroSlides(heroData)
-        }
+        if (Array.isArray(heroData)) setHeroSlides(heroData)
 
-        if (Array.isArray(testimonialsData) && testimonialsData.length) {
-          setTestimonials(testimonialsData)
-        }
+        if (Array.isArray(testimonialsData)) setTestimonials(testimonialsData)
 
         if (settingsData && typeof settingsData === 'object') {
           setSettings(settingsData)
         }
       } catch {
-        // Keep fallback content if API is unavailable.
+        setProducts([])
+        setHeroSlides([])
+        setTestimonials([])
+        setSettings({})
       } finally {
         if (isMounted) setLoading(false)
       }
@@ -55,8 +51,18 @@ export function ContentProvider({ children }) {
 
     load()
 
+    const reloadOnFocus = () => {
+      if (document.visibilityState === 'visible') {
+        load()
+      }
+    }
+    window.addEventListener('focus', load)
+    document.addEventListener('visibilitychange', reloadOnFocus)
+
     return () => {
       isMounted = false
+      window.removeEventListener('focus', load)
+      document.removeEventListener('visibilitychange', reloadOnFocus)
     }
   }, [])
 

@@ -1,0 +1,3 @@
+ALTER TABLE admins
+ADD COLUMN bio TEXT NULL AFTER location,
+ADD COLUMN profile_photo VARCHAR(255) NULL AFTER bio;

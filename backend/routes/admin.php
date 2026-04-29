@@ -14,6 +14,7 @@ use Backend\Controllers\StatController;
 use Backend\Controllers\TeamController;
 use Backend\Controllers\TestimonialController;
 use Backend\Controllers\UploadController;
+use Backend\Controllers\UserController;
 use Backend\Middleware\AuthMiddleware;
 use Backend\Utils\Router;
 
@@ -27,6 +28,7 @@ require_once __DIR__ . '/../controllers/GalleryController.php';
 require_once __DIR__ . '/../controllers/StatController.php';
 require_once __DIR__ . '/../controllers/SettingController.php';
 require_once __DIR__ . '/../controllers/UploadController.php';
+require_once __DIR__ . '/../controllers/UserController.php';
 require_once __DIR__ . '/../controllers/DashboardController.php';
 require_once __DIR__ . '/../controllers/SearchController.php';
 require_once __DIR__ . '/../middleware/auth.php';
@@ -109,4 +111,11 @@ function registerAdminRoutes(Router $router): void
 
     // Upload
     $router->post('/api/admin/upload', [UploadController::class, 'upload'], $mw);
+
+    // Users
+    $router->get('/api/admin/users', [UserController::class, 'index'], $mw);
+    $router->get('/api/admin/users/{id}', [UserController::class, 'show'], $mw);
+    $router->post('/api/admin/users', [UserController::class, 'store'], $mw);
+    $router->put('/api/admin/users/{id}', [UserController::class, 'update'], $mw);
+    $router->delete('/api/admin/users/{id}', [UserController::class, 'destroy'], $mw);
 }

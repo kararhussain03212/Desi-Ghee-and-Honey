@@ -1,9 +1,8 @@
-import { Link } from 'react-router-dom'
-import about1 from '../assets/banner/about1.jpeg'
+import { Link, Navigate } from 'react-router-dom'
 import { FaRegStar, FaStar, FaStarHalfAlt } from 'react-icons/fa'
 import { formatRs } from '../utils/money.js'
 import { useContent } from '../context/content.js'
-import { getSettingText } from '../utils/siteSettings.js'
+import { getSettingText, isSectionActive } from '../utils/siteSettings.js'
 import '../App.css'
 
 function getRatingStars(rating) {
@@ -20,6 +19,12 @@ function getRatingStars(rating) {
 
 function Product() {
   const { products, settings } = useContent()
+  const productActive = isSectionActive(settings, 'product', true)
+
+  if (!productActive) {
+    return <Navigate to="/" replace />
+  }
+
   const backendBase = (import.meta.env.VITE_BACKEND_URL || 'http://localhost/honey-ghee/backend').replace(/\/$/, '')
   const toAssetUrl = (path, fallback) => {
     if (!path) return fallback
@@ -27,7 +32,7 @@ function Product() {
     return `${backendBase}/${String(path).replace(/^\//, '')}`
   }
 
-  const heroImage = toAssetUrl(getSettingText(settings, 'product_page_hero_image', ''), about1)
+  const heroImage = toAssetUrl(getSettingText(settings, 'product_page_hero_image', ''), '')
   const heroTitle = getSettingText(settings, 'product_page_title', 'Product')
   const breadcrumbHome = getSettingText(settings, 'product_page_breadcrumb_home', 'Home')
   const breadcrumbCurrent = getSettingText(settings, 'product_page_breadcrumb_current', 'Product')
@@ -166,79 +171,6 @@ function Product() {
               </div>
             </section>
 
-
-        {/* <section className="blogSection" id="blog" aria-label="News and blog">
-                <div className="blogInner">
-                  <h2 className="blogTitle"  data-aos="fade-down" data-aos-duration="1000">
-                    News And <span>Blog</span>
-                  </h2>
-                  <p className="blogDesc" data-aos="fade-right" data-aos-duration="1000">
-                    Stay updated with the latest news, updates, and insights about our products and natural lifestyle.
-                  </p>
-        
-                  <div className="blogGrid">
-                    <article className="blogCard" data-aos="flip-left" data-aos-duration="2000">
-                      <div className="blogMedia">
-                        <img className="blogImg" src={mockuphoney} alt="Honey comb" loading="lazy" />
-                      </div>
-                      <div className="blogBody">
-                        <div className="blogMeta">
-                          <span className="blogMetaItem">
-                            <FiCalendar aria-hidden="true" /> 16 April,26
-                          </span>
-                          <span className="blogMetaItem">
-                            <FiHeart aria-hidden="true" /> 35 Million
-                          </span>
-                        </div>
-                        <h3 className="blogCardTitle">Pure Natural Honey Collected Fresh From Farms With Premium Quality And Taste.</h3>
-                        <a className="blogBtn" href="#contact">
-                          READ MORE <FiArrowRight aria-hidden="true" />
-                        </a>
-                      </div>
-                    </article>
-        
-                    <article className="blogCard" data-aos="flip-left" data-aos-duration="2000">
-                      <div className="blogMedia">
-                        <img className="blogImg" src={buffalo} alt="Honey jar" loading="lazy" />
-                      </div>
-                      <div className="blogBody">
-                        <div className="blogMeta">
-                          <span className="blogMetaItem">
-                            <FiCalendar aria-hidden="true" /> 16 April,26
-                          </span>
-                          <span className="blogMetaItem">
-                            <FiHeart aria-hidden="true" /> 80 Million
-                          </span>
-                        </div>
-                        <h3 className="blogCardTitle">Golden Buffalo Desi Ghee Made Traditionally For Rich Taste And Healthy Lifestyle</h3>
-                        <a className="blogBtn" href="#contact">
-                          READ MORE <FiArrowRight aria-hidden="true" />
-                        </a>
-                      </div>
-                    </article>
-        
-                    <article className="blogCard" data-aos="flip-left" data-aos-duration="2000">
-                      <div className="blogMedia">
-                        <img className="blogImg" src={goat} alt="Honey drip" loading="lazy" />
-                      </div>
-                      <div className="blogBody">
-                        <div className="blogMeta">
-                          <span className="blogMetaItem">
-                            <FiCalendar aria-hidden="true" /> 16 April,26
-                          </span>
-                          <span className="blogMetaItem">
-                            <FiHeart aria-hidden="true" /> 95 Million
-                          </span>
-                        </div>
-                        <h3 className="blogCardTitle">Fresh Goat Desi Ghee Prepared Naturally For Cooking Nutrition And Daily Use.</h3>
-                        <a className="blogBtn" href="#contact">
-                          READ MORE <FiArrowRight aria-hidden="true" />
-                        </a>
-                      </div>
-                    </article>
-                  </div>
-                </div>
-              </section> */}
     </main>
   )
 }

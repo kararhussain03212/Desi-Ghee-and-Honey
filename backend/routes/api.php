@@ -18,6 +18,8 @@ function registerApiRoutes(Router $router): void
     $router->post('/api/auth/login', [AuthController::class, 'login']);
     $router->post('/api/auth/logout', [AuthController::class, 'logout'], [[AuthMiddleware::class, 'requireAuth']]);
     $router->get('/api/auth/me', [AuthController::class, 'me'], [[AuthMiddleware::class, 'requireAuth']]);
+    $router->put('/api/auth/profile', [AuthController::class, 'updateProfile'], [[AuthMiddleware::class, 'requireAuth']]);
+    $router->put('/api/auth/password', [AuthController::class, 'changePassword'], [[AuthMiddleware::class, 'requireAuth']]);
 
     registerPublicRoutes($router);
     registerAdminRoutes($router);

@@ -12,6 +12,9 @@ import SliderForm from "./pages/slider/SliderForm";
 import SiteSettings from "./pages/settings/SiteSettings";
 import TestimonialList from "./pages/testimonial/TestimonialList";
 import TestimonialForm from "./pages/testimonial/TestimonialForm";
+import UserManagement from "./pages/users/UserManagement";
+import { useAuth } from "./context/useAuth";
+import { normalizeUserRole } from "./modules/users/constants";
 
 function ProtectedPage({ children }) {
   return (
@@ -19,6 +22,15 @@ function ProtectedPage({ children }) {
       <Layout>{children}</Layout>
     </ProtectedRoute>
   );
+}
+
+function AdminOnlyPage({ children }) {
+  const { user } = useAuth();
+  const isAdmin = normalizeUserRole(user?.role) === "admin";
+
+  if (!isAdmin) return <Navigate to="/dashboard" replace />;
+
+  return <>{children}</>;
 }
 
 export default function App() {
@@ -201,6 +213,64 @@ export default function App() {
             element={
               <ProtectedPage>
                 <SiteSettings forcedMainSection="contact" />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/settings/about"
+            element={
+              <ProtectedPage>
+                <SiteSettings forcedMainSection="about" forcedAboutSection="hero" />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/settings/about-hero"
+            element={
+              <ProtectedPage>
+                <SiteSettings forcedMainSection="about" forcedAboutSection="hero" />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/settings/about-info"
+            element={
+              <ProtectedPage>
+                <SiteSettings forcedMainSection="about" forcedAboutSection="info" />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/settings/about-company"
+            element={
+              <ProtectedPage>
+                <SiteSettings forcedMainSection="about" forcedAboutSection="company" />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/settings/about-category"
+            element={
+              <ProtectedPage>
+                <SiteSettings forcedMainSection="about" forcedAboutSection="category" />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/settings/about-process"
+            element={
+              <ProtectedPage>
+                <SiteSettings forcedMainSection="about" forcedAboutSection="process" />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <ProtectedPage>
+                <AdminOnlyPage>
+                  <UserManagement />
+                </AdminOnlyPage>
               </ProtectedPage>
             }
           />

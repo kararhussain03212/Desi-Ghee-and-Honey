@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   deleteTestimonial,
   getTestimonials,
   updateTestimonial,
 } from "../../api/testimonialApi";
+import { useAuth } from "../../context/useAuth";
+import { normalizeUserRole } from "../../modules/users/constants";
 
 const FALLBACK_AVATAR = `data:image/svg+xml;utf8,${encodeURIComponent(
   "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 300'><rect width='300' height='300' fill='#171717'/><text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle' fill='#ffffff' font-family='Arial,sans-serif' font-size='30'>Avatar</text></svg>",
@@ -12,9 +14,26 @@ const FALLBACK_AVATAR = `data:image/svg+xml;utf8,${encodeURIComponent(
 
 export default function TestimonialList() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [toast, setToast] = useState({ show: false, text: "" });
+
+  const isAdmin = normalizeUserRole(user?.role) === "admin";
+  const permissions = Array.isArray(user?.permissions) ? user.permissions : [];
+  const canAdd = isAdmin || permissions.includes("add_data");
+  const canEdit = isAdmin || permissions.includes("edit_data");
+  const canDelete = isAdmin || permissions.includes("delete_data");
+  const canPublish = isAdmin || permissions.includes("publish_data");
+
+  const showNoPerm = (action) => setToast({ show: true, text: `You do not have permission to ${action}.` });
+
+  useEffect(() => {
+    if (!toast.show) return;
+    const t = setTimeout(() => setToast({ show: false, text: "" }), 2200);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   const apiRoot = useMemo(() => {
     const base = import.meta.env.VITE_API_URL || "";
@@ -46,6 +65,10 @@ export default function TestimonialList() {
   }, []);
 
   const handleDelete = async (id) => {
+    if (!canDelete) {
+      showNoPerm("delete testimonials");
+      return;
+    }
     if (!window.confirm("Delete this testimonial?")) return;
     try {
       await deleteTestimonial(id);
@@ -57,6 +80,10 @@ export default function TestimonialList() {
   };
 
   const handleToggleActive = async (item) => {
+    if (!canPublish) {
+      showNoPerm("publish testimonials");
+      return;
+    }
     try {
       const nextStatus = item.status === "active" ? "inactive" : "active";
       const { data } = await updateTestimonial(item.id, { status: nextStatus });
@@ -86,13 +113,20 @@ export default function TestimonialList() {
             Manage testimonial cards shown on homepage.
           </p>
         </div>
-        <Link
-          to="/testimonials/new"
+        <button
+          type="button"
+          onClick={() => (canAdd ? navigate("/testimonials/new") : showNoPerm("add testimonials"))}
           className="inline-flex w-fit rounded-xl bg-[var(--admin-primary)] px-5 py-2.5 text-black hover:bg-[var(--admin-primary-strong)]"
         >
           + Add Testimonial
-        </Link>
+        </button>
       </header>
+
+      {toast.show ? (
+        <div className="fixed right-5 top-5 z-[220] rounded-xl border border-red-400/30 bg-red-500/90 px-4 py-2 text-sm font-medium text-white shadow-lg">
+          {toast.text}
+        </div>
+      ) : null}
 
       {error ? (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-300">
@@ -162,12 +196,13 @@ export default function TestimonialList() {
                     >
                       {item.status === "active" ? "Active" : "Inactive"}
                     </button>
-                    <Link
-                      to={`/testimonials/edit/${item.id}`}
-                      className="rounded-lg bg-[#1f8b4c] px-4 py-2 text-sm text-white hover:bg-[var(--admin-primary-strong)]"
+                    <button
+                      type="button"
+                      onClick={() => (canEdit ? navigate(`/testimonials/edit/${item.id}`) : showNoPerm("edit testimonials"))}
+                      className={`rounded-lg px-4 py-2 text-sm ${canEdit ? "bg-[#1f8b4c] text-white hover:bg-[var(--admin-primary-strong)]" : "border border-white/20 bg-white/10 text-white/60"}`}
                     >
                       Edit
-                    </Link>
+                    </button>
                     <button
                       type="button"
                       onClick={() => handleDelete(item.id)}
