@@ -7,6 +7,18 @@ function absoluteUrl(path) {
   return `${BACKEND_BASE_URL.replace(/\/$/, '')}/${String(path).replace(/^\//, '')}`
 }
 
+function decodeHtmlEntities(value) {
+  const text = String(value || '')
+  if (!text.includes('&')) return text
+
+  return text
+    .replaceAll('&amp;', '&')
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&#039;', "'")
+}
+
 async function request(path) {
   const response = await fetch(`${API_BASE_URL}${path}`)
 
@@ -81,9 +93,9 @@ export async function fetchPublicTestimonials() {
   return data.map((item) => ({
     id: String(item.id),
     avatar: absoluteUrl(item.avatar_path),
-    name: item.name,
-    role: item.role || 'Customer',
-    review: item.review || '',
+    name: decodeHtmlEntities(item.name),
+    role: decodeHtmlEntities(item.role || 'Customer'),
+    review: decodeHtmlEntities(item.review || ''),
     rating: Number(item.rating || 5),
   }))
 }

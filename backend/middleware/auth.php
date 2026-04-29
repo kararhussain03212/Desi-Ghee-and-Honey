@@ -17,7 +17,7 @@ final class AuthMiddleware
 
     public static function requireAuth(string $method, string $uri, array $params): void
     {
-        $header = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+        $header = self::resolveAuthorizationHeader();
         if (!preg_match('/Bearer\s+(.*)$/i', $header, $matches)) {
             Response::error('Missing authorization token', 401);
         }
@@ -47,5 +47,59 @@ final class AuthMiddleware
     public static function user(): ?array
     {
         return self::$currentAdmin;
+    }
+
+    private static function resolveAuthorizationHeader(): string
+    {
+        $serverHeader = trim((string) ($_SERVER['HTTP_AUTHORIZATION'] ?? ''));
+        if ($serverHeader !== '') {
+            return $serverHeader;
+        }
+
+        $redirectHeader = trim((string) ($_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? ''));
+        if ($redirectHeader !== '') {
+            return $redirectHeader;
+        }
+
+        foreach ($_SERVER as $key => $value) {
+            if (!is_string($key) || !str_contains($key, 'AUTHORIZATION')) {
+                continue;
+            }
+
+            $header = trim((string) $value);
+            if ($header !== '') {
+                return $header;
+            }
+        }
+
+        if (function_exists('getallheaders')) {
+            $headers = getallheaders();
+            if (is_array($headers)) {
+                foreach ($headers as $name => $value) {
+                    if (strcasecmp((string) $name, 'Authorization') === 0) {
+                        $header = trim((string) $value);
+                        if ($header !== '') {
+                            return $header;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (function_exists('apache_request_headers')) {
+            $headers = apache_request_headers();
+            if (is_array($headers)) {
+                foreach ($headers as $name => $value) {
+                    if (strcasecmp((string) $name, 'Authorization') === 0) {
+                        $header = trim((string) $value);
+                        if ($header !== '') {
+                            return $header;
+                        }
+                    }
+                }
+            }
+        }
+
+        return '';
     }
 }

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { deleteSlider, getSliders, updateSlider } from "../../api/sliderApi";
 
 const FALLBACK_IMAGE = `data:image/svg+xml;utf8,${encodeURIComponent(
-  "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 700'><rect width='1200' height='700' fill='#123523'/><text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle' fill='#ffffff' font-family='Arial,sans-serif' font-size='58'>Slider</text></svg>",
+  "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 700'><rect width='1200' height='700' fill='#171717'/><text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle' fill='#ffffff' font-family='Arial,sans-serif' font-size='58'>Slider</text></svg>",
 )}`;
 
 export default function SliderList() {
@@ -84,7 +84,7 @@ export default function SliderList() {
         </div>
         <Link
           to="/sliders/new"
-          className="inline-flex w-fit rounded-xl bg-[#1f8b4c] px-5 py-2.5 text-white hover:bg-[#176a39]"
+          className="inline-flex w-fit rounded-xl bg-[var(--admin-primary)] px-5 py-2.5 text-black hover:bg-[var(--admin-primary-strong)]"
         >
           + Add Slider
         </Link>
@@ -97,7 +97,7 @@ export default function SliderList() {
       ) : null}
 
       {sliders.length === 0 ? (
-        <div className="rounded-xl border border-white/10 bg-[#0d2a1b] p-6 text-white/70">
+        <div className="rounded-xl border border-white/10 bg-[var(--admin-bg)] p-6 text-white/70">
           No sliders found. Add your first slider.
         </div>
       ) : (
@@ -105,7 +105,7 @@ export default function SliderList() {
           {sliders.map((item) => (
             <article
               key={item.id}
-              className="overflow-hidden rounded-2xl border border-white/10 bg-[#0d2a1b]"
+              className="overflow-hidden rounded-2xl border border-white/10 bg-[var(--admin-bg)]"
             >
               <div className="grid grid-cols-1 md:grid-cols-[260px_1fr]">
                 <img
@@ -156,7 +156,7 @@ export default function SliderList() {
                       </button>
                       <Link
                         to={`/sliders/edit/${item.id}`}
-                        className="rounded-lg bg-[#1f8b4c] px-4 py-2 text-sm text-white hover:bg-[#176a39]"
+                        className="rounded-lg bg-[#1f8b4c] px-4 py-2 text-sm text-white hover:bg-[var(--admin-primary-strong)]"
                       >
                         Edit
                       </Link>

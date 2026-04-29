@@ -39,12 +39,12 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#123523] px-4 py-6">
+    <div className="flex min-h-screen items-center justify-center bg-[var(--admin-bg-deep)] px-4 py-6">
       <form
         onSubmit={onSubmit}
-        className="flex w-full max-w-sm flex-col items-center gap-6 rounded-2xl border border-[#f3a849]/35 bg-[#1a5e38] px-6 py-8 shadow-[0_14px_40px_rgba(0,0,0,0.35)] sm:max-w-md sm:px-10 sm:py-10"
+        className="flex w-full max-w-sm flex-col items-center gap-6 rounded-2xl border border-[var(--admin-border-amber)] bg-[var(--admin-card)] px-6 py-8 shadow-[0_14px_40px_rgba(0,0,0,0.35)] sm:max-w-md sm:px-10 sm:py-10"
       >
-        <img src={logo} alt="MA Foodstuff" className="h-16 w-auto sm:h-20" />
+        <img src={logo} alt="Swift Sign" className="h-16 w-auto sm:h-20" />
 
         <h1 className="text-3xl font-bold text-white sm:text-4xl">
           Admin Login
@@ -80,7 +80,7 @@ export default function Login() {
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-2xl bg-[#f3a849] px-10 py-3 text-base font-semibold text-[#0d2a1b] transition-transform duration-200 hover:scale-105 hover:bg-[#e09330] disabled:cursor-not-allowed disabled:opacity-70"
+          className="rounded-2xl bg-[var(--admin-primary)] px-10 py-3 text-base font-semibold text-black transition-transform duration-200 hover:scale-105 hover:bg-[var(--admin-primary-strong)] disabled:cursor-not-allowed disabled:opacity-70"
         >
           {submitting ? "Logging in..." : "Login"}
         </button>

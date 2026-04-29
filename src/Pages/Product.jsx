@@ -3,6 +3,7 @@ import about1 from '../assets/banner/about1.jpeg'
 import { FaRegStar, FaStar, FaStarHalfAlt } from 'react-icons/fa'
 import { formatRs } from '../utils/money.js'
 import { useContent } from '../context/content.js'
+import { getSettingText } from '../utils/siteSettings.js'
 import '../App.css'
 
 function getRatingStars(rating) {
@@ -18,25 +19,52 @@ function getRatingStars(rating) {
 }
 
 function Product() {
-  const { products } = useContent()
+  const { products, settings } = useContent()
+  const backendBase = (import.meta.env.VITE_BACKEND_URL || 'http://localhost/honey-ghee/backend').replace(/\/$/, '')
+  const toAssetUrl = (path, fallback) => {
+    if (!path) return fallback
+    if (/^https?:\/\//i.test(path)) return path
+    return `${backendBase}/${String(path).replace(/^\//, '')}`
+  }
+
+  const heroImage = toAssetUrl(getSettingText(settings, 'product_page_hero_image', ''), about1)
+  const heroTitle = getSettingText(settings, 'product_page_title', 'Product')
+  const breadcrumbHome = getSettingText(settings, 'product_page_breadcrumb_home', 'Home')
+  const breadcrumbCurrent = getSettingText(settings, 'product_page_breadcrumb_current', 'Product')
+
+  const showcaseKicker = getSettingText(settings, 'product_showcase_kicker', 'OUR PRODUCT')
+  const showcaseTitle = getSettingText(settings, 'product_showcase_title', 'TRY OUT A DIFFERENT HONEY & GHEE TASTE THIS TIME')
+  const showcaseText = getSettingText(
+    settings,
+    'product_showcase_text',
+    'SwiftSign General Trading offers a diverse range of premium honey and desi ghee products, carefully sourced and crafted to deliver exceptional taste and quality. With a strong focus on expertise and industry standards, we ensure natural freshness, rich flavor, and reliable quality in every product, giving customers a unique and satisfying experience every time',
+  )
   const showcaseProducts = products.slice(0, 4)
+
+  const catalogTitle = getSettingText(settings, 'product_catalog_title', 'Fresh Desi Ghee &')
+  const catalogTitleHighlight = getSettingText(settings, 'product_catalog_title_highlight', 'Honey')
+  const catalogDescription = getSettingText(
+    settings,
+    'product_catalog_description',
+    'Made from fresh and natural ingredients, our Sunflower Original Desi Ghee offers rich taste and premium quality.',
+  )
 
   return (
     <main className="productPage" aria-label="Product page">
-      <section className="aboutHero" aria-label="About hero" style={{ backgroundImage: `url(${about1})` }}>
+      <section className="aboutHero" aria-label="About hero" style={{ backgroundImage: `url(${heroImage})` }}>
         {/* <img className="aboutHero__decor aboutHero__decor--left" src={honeyL} alt="" />
         <img className="aboutHero__decor aboutHero__decor--right" src={icon2} alt="" /> */}
 
         <div className="aboutHero__inner" data-aos="fade-up" data-aos-duration="1000">
-          <h1 className="aboutHero__title">Product</h1>
+          <h1 className="aboutHero__title">{heroTitle}</h1>
           <p className="aboutHero__crumbs" aria-label="Breadcrumb">
             <Link className="aboutHero__crumbLink" to="/">
-              Home
+              {breadcrumbHome}
             </Link>{' '}
             <span className="aboutHero__sep" aria-hidden="true">
               /
             </span>{' '}
-            <span className="aboutHero__crumbCurrent">Product</span>
+            <span className="aboutHero__crumbCurrent">{breadcrumbCurrent}</span>
           </p>
         </div>
       </section>
@@ -46,15 +74,15 @@ function Product() {
           <div className="productShowcase__top">
             <div className="productShowcase__left">
               <p className="productShowcase__kicker" data-aos="fade-down" data-aos-duration="1000">
-                OUR PRODUCT
+                {showcaseKicker}
               </p>
               <h2 className="productShowcase__title" data-aos="fade-left" data-aos-duration="1000">
-                TRY OUT A DIFFERENT HONEY & GHEE TASTE THIS TIME
+                {showcaseTitle}
               </h2>
             </div>
             <div className="productShowcase__right">
               <p className="productShowcase__text" data-aos="fade-right" data-aos-duration="1000">
-               SwiftSign General Trading offers a diverse range of premium honey and desi ghee products, carefully sourced and crafted to deliver exceptional taste and quality. With a strong focus on expertise and industry standards, we ensure natural freshness, rich flavor, and reliable quality in every product, giving customers a unique and satisfying experience every time
+               {showcaseText}
               </p>
               {/* <a className="productShowcase__btn" href="#shop" aria-label="Shop online">
                 Shop Online
@@ -85,10 +113,10 @@ function Product() {
       <section className="productsSection" id="shop" aria-label="Fresh honey products">
               <div className="productsInner">
                 <h2 className="productsTitle">
-                  Fresh Desi Ghee & <span>Honey</span>
+                  {catalogTitle} <span>{catalogTitleHighlight}</span>
                 </h2>
                 <p className="productsDesc">
-                  Made from fresh and natural ingredients, our Sunflower Original Desi Ghee offers rich taste and premium quality.
+                  {catalogDescription}
                 </p>
       
                 <div className="productsGrid">

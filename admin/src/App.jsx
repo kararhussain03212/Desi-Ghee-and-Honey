@@ -7,10 +7,11 @@ import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import ProductList from "./pages/product/ProductList";
 import ProductForm from "./pages/product/ProductForm";
-import ServiceList from "./pages/service/ServiceList";
-import ServiceForm from "./pages/service/ServiceForm";
 import SliderList from "./pages/slider/SliderList";
 import SliderForm from "./pages/slider/SliderForm";
+import SiteSettings from "./pages/settings/SiteSettings";
+import TestimonialList from "./pages/testimonial/TestimonialList";
+import TestimonialForm from "./pages/testimonial/TestimonialForm";
 
 function ProtectedPage({ children }) {
   return (
@@ -75,31 +76,6 @@ export default function App() {
           />
 
           <Route
-            path="/services"
-            element={
-              <ProtectedPage>
-                <ServiceList />
-              </ProtectedPage>
-            }
-          />
-          <Route
-            path="/services/new"
-            element={
-              <ProtectedPage>
-                <ServiceForm />
-              </ProtectedPage>
-            }
-          />
-          <Route
-            path="/services/edit/:id"
-            element={
-              <ProtectedPage>
-                <ServiceForm />
-              </ProtectedPage>
-            }
-          />
-
-          <Route
             path="/sliders"
             element={
               <ProtectedPage>
@@ -123,12 +99,108 @@ export default function App() {
               </ProtectedPage>
             }
           />
+          <Route
+            path="/testimonials"
+            element={
+              <ProtectedPage>
+                <TestimonialList />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/testimonials/new"
+            element={
+              <ProtectedPage>
+                <TestimonialForm />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/testimonials/edit/:id"
+            element={
+              <ProtectedPage>
+                <TestimonialForm />
+              </ProtectedPage>
+            }
+          />
 
           <Route
             path="/profile"
             element={
               <ProtectedPage>
                 <Admin />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedPage>
+                <Navigate to="/settings/navbar" replace />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/settings/navbar"
+            element={
+              <ProtectedPage>
+                <SiteSettings forcedMainSection="navbar" />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/settings/home"
+            element={
+              <ProtectedPage>
+                <SiteSettings forcedMainSection="home" />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/settings/home-about"
+            element={
+              <ProtectedPage>
+                <SiteSettings forcedMainSection="home" forcedHomeSection="about" />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/settings/home-company"
+            element={
+              <ProtectedPage>
+                <SiteSettings forcedMainSection="home" forcedHomeSection="company" />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/settings/home-offer"
+            element={
+              <ProtectedPage>
+                <SiteSettings forcedMainSection="home" forcedHomeSection="offer" />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/settings/footer"
+            element={
+              <ProtectedPage>
+                <SiteSettings forcedMainSection="footer" />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/settings/product"
+            element={
+              <ProtectedPage>
+                <SiteSettings forcedMainSection="product" />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/settings/contact"
+            element={
+              <ProtectedPage>
+                <SiteSettings forcedMainSection="contact" />
               </ProtectedPage>
             }
           />

@@ -1,12 +1,54 @@
 import { useEffect, useState } from 'react'
 import { FiArrowUp, FiMail, FiMapPin, FiPhone, FiSend } from 'react-icons/fi'
 import { GiHoneyJar } from 'react-icons/gi'
-import { FaFacebookF, FaGooglePlusG, FaInstagram, FaTiktok } from 'react-icons/fa'
-
+import { FaFacebookF, FaInstagram, FaTiktok } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
+import { useContent } from '../context/content.js'
+import { getSettingJson, getSettingText } from '../utils/siteSettings.js'
 
 function Footer() {
   const [showTop, setShowTop] = useState(false)
+  const { settings } = useContent()
+  const backendBase = (import.meta.env.VITE_BACKEND_URL || 'http://localhost/honey-ghee/backend').replace(/\/$/, '')
+  const toAssetUrl = (path) => {
+    if (!path) return ''
+    if (/^https?:\/\//i.test(path)) return path
+    return `${backendBase}/${String(path).replace(/^\//, '')}`
+  }
+
+  const brandText = getSettingText(settings, 'site_brand_text', 'Swift Sign')
+  const footerLogo = getSettingText(settings, 'footer_logo', '')
+  const footerDescription = getSettingText(
+    settings,
+    'footer_description',
+    'SwiftSign General Trading includes a broad range of activities, defined by expertise and industry practices',
+  )
+  const contactAddress = getSettingText(settings, 'contact_address', 'I-8 Markaz, Islamabad, Pakistan')
+  const contactPhone = getSettingText(settings, 'contact_phone', '+92 333 8399480')
+  const contactEmail = getSettingText(settings, 'contact_email', 'info@swiftsigngeneraltrading.com')
+  const footerAccountTitle = getSettingText(settings, 'footer_account_title', 'MY ACCOUNT')
+  const footerNewsletterTitle = getSettingText(settings, 'footer_newsletter_title', 'NEWSLETTER')
+  const footerNewsletterDescription = getSettingText(
+    settings,
+    'footer_newsletter_description',
+    'You will be notified when SwiftSign General Trading shares something new',
+  )
+  const footerCopyright = getSettingText(settings, 'footer_copyright', 'Copyright © 2026 All Rights Reserved.')
+  const footerCreditText = getSettingText(settings, 'footer_credit_text', 'Swift IT')
+  const footerCreditUrl = getSettingText(settings, 'footer_credit_url', 'https://it.swiftsignbm.com/')
+
+  const footerLinks = getSettingJson(settings, 'footer_links', [
+    { label: 'Home', path: '/' },
+    { label: 'About', path: '/about' },
+    { label: 'Product', path: '/product' },
+    { label: 'Contact', path: '/contact' },
+  ])
+
+  const footerSocials = getSettingJson(settings, 'footer_social_links', [
+    { label: 'Facebook', url: '#', icon: 'facebook' },
+    { label: 'TikTok', url: '#', icon: 'tiktok' },
+    { label: 'Instagram', url: '#', icon: 'instagram' },
+  ])
 
   useEffect(() => {
     const onScroll = () => {
@@ -22,26 +64,34 @@ function Footer() {
       <div className="footer__top">
         <div className="footer__inner">
           <div className="footer__col">
-            <Link className="footer__brand" to="/" aria-label="Annahl Home">
-              <GiHoneyJar className="footer__brandIcon" aria-hidden="true" />
-              <span className="footer__brandText">Swift Sign</span>
+            <Link className="footer__brand" to="/" aria-label="Home">
+              {footerLogo ? (
+                <img src={toAssetUrl(footerLogo)} alt={brandText} className="footer__brandIcon" />
+              ) : (
+                <GiHoneyJar className="footer__brandIcon" aria-hidden="true" />
+              )}
+              <span className="footer__brandText">{brandText}</span>
             </Link>
-            <p className="footer__desc">
-              SwiftSign General Trading includes a broad range of activities, defined by expertise and industry practices
-            </p>
+            <p className="footer__desc">{footerDescription}</p>
             <div className="footer__social" aria-label="Social links">
-              <a className="footer__socialBtn" aria-label="Facebook">
-                <FaFacebookF aria-hidden="true" />
-              </a>
-              <a className="footer__socialBtn"  aria-label="TikTok" target="_blank" rel="noopener noreferrer">
-                <FaTiktok aria-hidden="true" />
-              </a>
-              <a className="footer__socialBtn"  aria-label="Instagram">
-                <FaInstagram aria-hidden="true" />
-              </a>
-              {/* <a className="footer__socialBtn" href="#google" aria-label="Google Plus">
-                <FaGooglePlusG aria-hidden="true" />
-              </a> */}
+              {footerSocials.map((social) => {
+                let Icon = FaFacebookF
+                if (social.icon === 'tiktok') Icon = FaTiktok
+                if (social.icon === 'instagram') Icon = FaInstagram
+
+                return (
+                  <a
+                    key={`${social.label}-${social.url}`}
+                    className="footer__socialBtn"
+                    href={social.url || '#'}
+                    aria-label={social.label}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Icon aria-hidden="true" />
+                  </a>
+                )
+              })}
             </div>
           </div>
 
@@ -49,49 +99,35 @@ function Footer() {
             <h3 className="footer__heading">CONTACT</h3>
             <ul className="footer__list">
               <li className="footer__item">
-                <FiMapPin aria-hidden="true" /> I-8 Markaz, Islamabad, Pakistan
+                <FiMapPin aria-hidden="true" /> {contactAddress}
               </li>
               <li className="footer__item">
-                <FiPhone aria-hidden="true" /> +92 333 8399480
+                <FiPhone aria-hidden="true" /> {contactPhone}
               </li>
               <li className="footer__item">
-                <FiMail aria-hidden="true" /> info@swiftsigngeneraltrading.com
+                <FiMail aria-hidden="true" /> {contactEmail}
               </li>
             </ul>
           </div>
 
           <div className="footer__col">
-            <h3 className="footer__heading">MY ACCOUNT</h3>
+            <h3 className="footer__heading">{footerAccountTitle}</h3>
             <ul className="footer__links">
-              <li>
-                <Link to="/">Home</Link>
-              </li>
-              <li>
-                <Link to="/about">About</Link>
-              </li>
-              <li>
-                <Link to="/product">Product</Link>
-              </li>
-              <li>
-                <Link to="/contact">Contact</Link>
-              </li>
+              {footerLinks.map((item) => (
+                <li key={`${item.path}-${item.label}`}>
+                  <Link to={item.path}>{item.label}</Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           <div className="footer__col">
-            <h3 className="footer__heading">NEW SLETTER</h3>
-            <p className="footer__desc">
-              You will be notified when SwiftSign General Trading shares something new
-            </p>
+            <h3 className="footer__heading">{footerNewsletterTitle}</h3>
+            <p className="footer__desc">{footerNewsletterDescription}</p>
             <form className="footer__form" onSubmit={(e) => e.preventDefault()}>
               <label className="footer__field">
                 <span className="footer__sr">Email address</span>
-                <input
-                  className="footer__input"
-                  type="email"
-                  placeholder="Email Address *"
-                  required
-                />
+                <input className="footer__input" type="email" placeholder="Email Address *" required />
               </label>
               <button className="footer__send" type="submit" aria-label="Subscribe">
                 <FiSend aria-hidden="true" />
@@ -103,9 +139,9 @@ function Footer() {
 
       <div className="footer__bottom">
         <div className="footer__bottomInner">
-          Copyright © 2026 All Rights Reserved. 
-          <a href="https://it.swiftsignbm.com/" target="_blank" rel="noopener noreferrer">
-             Swift IT
+          {footerCopyright}{' '}
+          <a href={footerCreditUrl} target="_blank" rel="noopener noreferrer">
+            {footerCreditText}
           </a>
         </div>
       </div>

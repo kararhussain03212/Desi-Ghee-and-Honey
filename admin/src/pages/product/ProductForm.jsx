@@ -166,7 +166,7 @@ export default function ProductForm() {
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-5 rounded-2xl border border-white/10 bg-[#0d2a1b] p-6"
+        className="space-y-5 rounded-2xl border border-white/10 bg-[var(--admin-bg)] p-6"
       >
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div>
@@ -175,7 +175,7 @@ export default function ProductForm() {
               value={form.title}
               onChange={(e) => setField("title", e.target.value)}
               required
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
             />
           </div>
 
@@ -188,7 +188,7 @@ export default function ProductForm() {
               value={form.price}
               onChange={(e) => setField("price", e.target.value)}
               required
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
             />
           </div>
 
@@ -200,7 +200,7 @@ export default function ProductForm() {
               step="1"
               value={form.oldPrice}
               onChange={(e) => setField("oldPrice", e.target.value)}
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
             />
           </div>
         </div>
@@ -211,7 +211,7 @@ export default function ProductForm() {
             <input
               value={form.sku}
               onChange={(e) => setField("sku", e.target.value)}
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
             />
           </div>
 
@@ -220,7 +220,7 @@ export default function ProductForm() {
             <input
               value={form.badge}
               onChange={(e) => setField("badge", e.target.value)}
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
             />
           </div>
 
@@ -233,7 +233,7 @@ export default function ProductForm() {
               step="0.5"
               value={form.rating}
               onChange={(e) => setField("rating", e.target.value)}
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
             />
           </div>
         </div>
@@ -246,7 +246,7 @@ export default function ProductForm() {
               min="0"
               value={form.orderPosition}
               onChange={(e) => setField("orderPosition", Number(e.target.value))}
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
             />
           </div>
           <div>
@@ -255,7 +255,7 @@ export default function ProductForm() {
               value={form.variantsJson}
               onChange={(e) => setField("variantsJson", e.target.value)}
               placeholder='[{"label":"250g","price":1200}]'
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
             />
           </div>
         </div>
@@ -266,7 +266,7 @@ export default function ProductForm() {
             rows={4}
             value={form.description}
             onChange={(e) => setField("description", e.target.value)}
-            className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+            className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
           />
         </div>
 
@@ -294,7 +294,7 @@ export default function ProductForm() {
           <button
             type="submit"
             disabled={saving}
-            className="rounded-lg bg-[#1f8b4c] px-5 py-2 text-white hover:bg-[#176a39] disabled:opacity-60"
+            className="rounded-lg bg-[var(--admin-primary)] px-5 py-2 text-black hover:bg-[var(--admin-primary-strong)] disabled:opacity-60"
           >
             {saving ? "Saving..." : isEditMode ? "Update" : "Create"}
           </button>

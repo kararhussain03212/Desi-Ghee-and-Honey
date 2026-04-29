@@ -1,5 +1,7 @@
 import React from 'react'
 import { FaWhatsapp } from 'react-icons/fa'
+import { useContent } from '../context/content.js'
+import { getSettingText, toWhatsAppDigits } from '../utils/siteSettings.js'
 
 
 /**
@@ -7,8 +9,10 @@ import { FaWhatsapp } from 'react-icons/fa'
  * Fixed position button that allows users to contact via WhatsApp
  */
 function FloatingWhatsApp() {
-  const phoneNumber = '+923338399480' // WhatsApp number without formatting
+  const { settings } = useContent()
+  const phoneNumber = toWhatsAppDigits(getSettingText(settings, 'whatsapp_number', '923338399480'))
   const whatsappUrl = `https://wa.me/${phoneNumber}`
+  const tooltip = getSettingText(settings, 'whatsapp_tooltip', 'Chat with us!')
 
   return (
     <a
@@ -20,7 +24,7 @@ function FloatingWhatsApp() {
       title="Contact us on WhatsApp"
     >
       <FaWhatsapp className="floatingWhatsApp__icon" />
-      <span className="floatingWhatsApp__tooltip">Chat with us!</span>
+      <span className="floatingWhatsApp__tooltip">{tooltip}</span>
     </a>
   )
 }

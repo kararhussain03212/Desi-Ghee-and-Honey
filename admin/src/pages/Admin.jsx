@@ -94,7 +94,7 @@ export default function Admin() {
 
   return (
     <section className="space-y-5">
-      <header className="rounded-2xl border border-white/10 bg-[#0d2a1b] p-5 sm:p-6">
+      <header className="rounded-2xl border border-white/10 bg-[var(--admin-bg)] p-5 sm:p-6">
         <h2 className="text-3xl font-bold text-white">Admin Settings</h2>
       </header>
 
@@ -112,7 +112,7 @@ export default function Admin() {
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <form
           onSubmit={submitProfile}
-          className="space-y-4 rounded-2xl border border-white/10 bg-[#0d2a1b] p-5"
+          className="space-y-4 rounded-2xl border border-white/10 bg-[var(--admin-bg)] p-5"
         >
           <h3 className="text-lg font-semibold text-white">Profile</h3>
           <div>
@@ -122,7 +122,7 @@ export default function Admin() {
               onChange={(e) =>
                 setProfileForm((prev) => ({ ...prev, name: e.target.value }))
               }
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
               required
             />
           </div>
@@ -133,12 +133,12 @@ export default function Admin() {
               onChange={(e) =>
                 setProfileForm((prev) => ({ ...prev, email: e.target.value }))
               }
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
             />
           </div>
           <button
             type="submit"
-            className="rounded-lg bg-[#1f8b4c] px-5 py-2 text-white hover:bg-[#176a39]"
+            className="rounded-lg bg-[var(--admin-primary)] px-5 py-2 text-black hover:bg-[var(--admin-primary-strong)]"
           >
             Save Profile
           </button>
@@ -146,7 +146,7 @@ export default function Admin() {
 
         <form
           onSubmit={submitPassword}
-          className="space-y-4 rounded-2xl border border-white/10 bg-[#0d2a1b] p-5"
+          className="space-y-4 rounded-2xl border border-white/10 bg-[var(--admin-bg)] p-5"
         >
           <h3 className="text-lg font-semibold text-white">Change Password</h3>
           <div>
@@ -162,7 +162,7 @@ export default function Admin() {
                   currentPassword: e.target.value,
                 }))
               }
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
               required
             />
           </div>
@@ -179,13 +179,13 @@ export default function Admin() {
                   nextPassword: e.target.value,
                 }))
               }
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
               required
             />
           </div>
           <button
             type="submit"
-            className="rounded-lg bg-[#1f8b4c] px-5 py-2 text-white hover:bg-[#176a39]"
+            className="rounded-lg bg-[var(--admin-primary)] px-5 py-2 text-black hover:bg-[var(--admin-primary-strong)]"
           >
             Change Password
           </button>
@@ -196,7 +196,7 @@ export default function Admin() {
       {isSuperAdmin ? (
         <form
           onSubmit={submitCreateAccount}
-          className="space-y-4 rounded-2xl border border-white/10 bg-[#0d2a1b] p-5"
+          className="space-y-4 rounded-2xl border border-white/10 bg-[var(--admin-bg)] p-5"
         >
           <h3 className="text-lg font-semibold text-white">Create New Account</h3>
           <p className="text-sm text-white/70">
@@ -210,7 +210,7 @@ export default function Admin() {
                 setAccountForm((prev) => ({ ...prev, name: e.target.value }))
               }
               placeholder="Editor name"
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white placeholder:text-white/40 disabled:opacity-70"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white placeholder:text-white/40 disabled:opacity-70"
               required
               disabled={creatingAccount}
             />
@@ -221,7 +221,7 @@ export default function Admin() {
                 setAccountForm((prev) => ({ ...prev, email: e.target.value }))
               }
               placeholder="editor@email.com"
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white placeholder:text-white/40 disabled:opacity-70"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white placeholder:text-white/40 disabled:opacity-70"
               required
               disabled={creatingAccount}
             />
@@ -232,7 +232,7 @@ export default function Admin() {
                 setAccountForm((prev) => ({ ...prev, password: e.target.value }))
               }
               placeholder="Minimum 6 characters"
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white placeholder:text-white/40 disabled:opacity-70"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white placeholder:text-white/40 disabled:opacity-70"
               required
               disabled={creatingAccount}
             />
@@ -241,14 +241,14 @@ export default function Admin() {
           <button
             type="submit"
             disabled={creatingAccount}
-            className="rounded-lg bg-[#1f8b4c] px-5 py-2 text-white hover:bg-[#176a39] disabled:cursor-not-allowed disabled:opacity-70"
+            className="rounded-lg bg-[var(--admin-primary)] px-5 py-2 text-black hover:bg-[var(--admin-primary-strong)] disabled:cursor-not-allowed disabled:opacity-70"
           >
             {creatingAccount ? "Creating..." : "Create Editor Account"}
           </button>
         </form>
       ) : null}
 
-      <div className="rounded-2xl border border-white/10 bg-[#0d2a1b] p-5">
+      <div className="rounded-2xl border border-white/10 bg-[var(--admin-bg)] p-5">
         <h3 className="mb-3 text-lg font-semibold text-white">Admin Users</h3>
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">

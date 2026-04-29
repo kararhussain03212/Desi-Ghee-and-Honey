@@ -150,7 +150,7 @@ export default function SliderForm() {
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-5 rounded-2xl border border-white/10 bg-[#0d2a1b] p-6"
+        className="space-y-5 rounded-2xl border border-white/10 bg-[var(--admin-bg)] p-6"
       >
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
@@ -159,7 +159,7 @@ export default function SliderForm() {
               value={form.title}
               onChange={(e) => setField("title", e.target.value)}
               required
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
             />
           </div>
           <div>
@@ -167,7 +167,7 @@ export default function SliderForm() {
             <input
               value={form.buttonText}
               onChange={(e) => setField("buttonText", e.target.value)}
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
             />
           </div>
         </div>
@@ -177,7 +177,7 @@ export default function SliderForm() {
           <input
             value={form.buttonLink}
             onChange={(e) => setField("buttonLink", e.target.value)}
-            className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+            className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
           />
         </div>
 
@@ -187,7 +187,7 @@ export default function SliderForm() {
             rows={4}
             value={form.subtitle}
             onChange={(e) => setField("subtitle", e.target.value)}
-            className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+            className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
           />
         </div>
 
@@ -199,7 +199,7 @@ export default function SliderForm() {
               min="0"
               value={form.orderPosition}
               onChange={(e) => setField("orderPosition", Number(e.target.value))}
-              className="w-full rounded-lg border border-white/20 bg-[#123523] px-3 py-2 text-white"
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
             />
           </div>
           <label className="flex items-center gap-2 self-end text-sm text-white/85">
@@ -231,7 +231,7 @@ export default function SliderForm() {
           <button
             type="submit"
             disabled={saving}
-            className="rounded-lg bg-[#1f8b4c] px-5 py-2 text-white hover:bg-[#176a39] disabled:opacity-60"
+            className="rounded-lg bg-[var(--admin-primary)] px-5 py-2 text-black hover:bg-[var(--admin-primary-strong)] disabled:opacity-60"
           >
             {saving ? "Saving..." : isEditMode ? "Update" : "Create"}
           </button>

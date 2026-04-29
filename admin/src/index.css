@@ -2,6 +2,22 @@
 
 :root {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  /* Dark theme matching new yellow logo */
+  --admin-bg: #121212;
+  --admin-bg-deep: #0a0a0a;
+  --admin-sidebar: #171717;
+  --admin-sidebar-hover: #262626;
+  --admin-card: #171717;
+  --admin-card-elevated: #262626;
+  --admin-ink: #ffffff;
+  --admin-muted: rgba(255,255,255,0.6);
+  --admin-primary: #ffc107;
+  --admin-primary-strong: #e0a800;
+  --admin-amber: #ffc107;
+  --admin-accent: #ffc107;
+  --admin-accent-strong: #e0a800;
+  --admin-border: rgba(255,255,255,0.1);
+  --admin-border-amber: rgba(255,193,7,0.3);
 }
 
 *,
@@ -19,8 +35,8 @@ body,
 
 body {
   margin: 0;
-  background: radial-gradient(circle at top, #1d5a37 0%, #0b2418 42%, #06140d 100%);
-  color: #ffffff;
+  background: var(--admin-bg-deep);
+  color: var(--admin-ink);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
@@ -40,14 +56,14 @@ a {
 .admin-theme .p-inputtext,
 .admin-theme .p-dropdown {
   width: 100%;
-  border-color: rgba(243, 168, 73, 0.35);
-  background: #123523;
-  color: #ffffff;
+  border-color: var(--admin-border);
+  background: var(--admin-card);
+  color: var(--admin-ink);
 }
 
 .admin-theme .p-dropdown .p-dropdown-label,
 .admin-theme .p-dropdown .p-dropdown-trigger {
-  color: #ffffff;
+  color: var(--admin-ink);
 }
 
 .admin-theme .p-button {
@@ -56,6 +72,6 @@ a {
 
 .admin-theme .p-inputtext:enabled:focus,
 .admin-theme .p-dropdown:not(.p-disabled).p-focus {
-  border-color: #f3a849;
-  box-shadow: 0 0 0 1px #f3a849;
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 1px var(--admin-primary);
 }

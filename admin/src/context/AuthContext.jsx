@@ -5,6 +5,7 @@ import { loginApi, meApi } from "../api/authApi";
 const ADMIN_ID = String(import.meta.env.VITE_ADMIN_ID || "").trim();
 const TOKEN_KEY = "token";
 const AUTH_USER_KEY = "authUser";
+const CSRF_TOKEN_KEY = "csrfToken";
 
 const normalizeEmail = (value) =>
   String(value || "")
@@ -14,6 +15,20 @@ const normalizeEmail = (value) =>
 const SUPER_ADMIN_EMAIL = normalizeEmail(
   ADMIN_ID || "info@mafoodstufftrading.com",
 );
+
+const getLoginErrorMessage = (error) => {
+  const apiError = String(
+    error?.response?.data?.error || error?.response?.data?.message || "",
+  ).trim();
+  const fallback = String(error?.message || "Invalid credentials").trim();
+  const message = apiError || fallback;
+
+  if (/database connection failed/i.test(message)) {
+    return "Database is unavailable. Start MySQL in XAMPP and try again.";
+  }
+
+  return message;
+};
 
 const normalizeRole = (value) => {
   const role = String(value || "")
@@ -238,6 +253,12 @@ export function AuthProvider({ children }) {
 
       localStorage.setItem(TOKEN_KEY, nextToken);
       localStorage.setItem(AUTH_USER_KEY, JSON.stringify(sessionUser));
+      const csrfToken = String(payload?.csrf_token || data?.csrf_token || "").trim();
+      if (csrfToken) {
+        localStorage.setItem(CSRF_TOKEN_KEY, csrfToken);
+      } else {
+        localStorage.removeItem(CSRF_TOKEN_KEY);
+      }
       setToken(nextToken);
       setUser(sessionUser);
       await refreshUsers();
@@ -246,9 +267,7 @@ export function AuthProvider({ children }) {
     try {
       await doBackendLogin();
     } catch (error) {
-      throw new Error(
-        error?.response?.data?.message || error?.message || "Invalid credentials",
-      );
+      throw new Error(getLoginErrorMessage(error));
     }
   };
 
@@ -345,6 +364,7 @@ export function AuthProvider({ children }) {
   const logout = () => {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(AUTH_USER_KEY);
+    localStorage.removeItem(CSRF_TOKEN_KEY);
     setToken(null);
     setUser(null);
     setUsers([getDefaultSuperAdmin()]);

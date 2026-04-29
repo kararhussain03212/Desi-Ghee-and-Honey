@@ -4,6 +4,7 @@ const envApiBase = (import.meta.env.VITE_API_URL || "").trim()
 const API_BASE_URL = envApiBase || (import.meta.env.DEV ? "/api" : "/honey-ghee/backend/api")
 const TOKEN_KEY = 'token'
 const AUTH_USER_KEY = 'authUser'
+const CSRF_TOKEN_KEY = 'csrfToken'
 
 const parseJwtPayload = (token) => {
   if (!token || typeof token !== 'string') return null
@@ -29,6 +30,7 @@ const hasValidJwtShape = (token) => {
 const clearAuthStorage = () => {
   localStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(AUTH_USER_KEY)
+  localStorage.removeItem(CSRF_TOKEN_KEY)
 }
 
 const emitAuthLogout = () => {
@@ -43,8 +45,13 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem(TOKEN_KEY)
+  const csrfToken = localStorage.getItem(CSRF_TOKEN_KEY)
   if (token && hasValidJwtShape(token)) {
     config.headers.Authorization = `Bearer ${token}`
+    const method = String(config.method || 'get').toUpperCase()
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) && csrfToken) {
+      config.headers['X-CSRF-Token'] = csrfToken
+    }
   } else if (token) {
     clearAuthStorage()
     emitAuthLogout()
