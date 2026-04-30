@@ -21,14 +21,18 @@ function NavBar() {
     return `${backendBase}/${String(path).replace(/^\//, '')}`
   }
 
-  const brandText = getSettingText(settings, 'site_brand_text', 'Swift Sign')
+  const brandText = getSettingText(settings, "site_brand_text", "");
   const navLogo = getSettingText(settings, 'nav_logo', '')
-  const navLinks = getSettingJson(settings, 'nav_links', [
-    { label: 'Home', path: '/' },
-    { label: 'About', path: '/about' },
-    { label: 'Product', path: '/product' },
-    { label: 'Contact', path: '/contact' },
-  ])
+  const navLinkHome = getSettingText(settings, "nav_link_home", "");
+  const navLinkAbout = getSettingText(settings, "nav_link_about", "");
+  const navLinkProduct = getSettingText(settings, "nav_link_product", "");
+  const navLinkContact = getSettingText(settings, "nav_link_contact", "");
+  const navLinks = [
+    { label: navLinkHome, path: "/" },
+    { label: navLinkAbout, path: "/about" },
+    { label: navLinkProduct, path: "/product" },
+    { label: navLinkContact, path: "/contact" },
+  ];
   const filteredNavLinks = navLinks.filter((item) => {
     if (item.path === '/about') return isSectionActive(settings, 'about', true)
     if (item.path === '/product') return isSectionActive(settings, 'product', true)

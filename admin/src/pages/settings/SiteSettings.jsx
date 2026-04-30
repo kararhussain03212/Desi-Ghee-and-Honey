@@ -9,6 +9,7 @@ import FooterSettingsSection from "./sections/FooterSettingsSection";
 import ProductSettingsSection from "./sections/ProductSettingsSection";
 import ContactSettingsSection from "./sections/ContactSettingsSection";
 import AboutSettingsSection from "./sections/AboutSettingsSection";
+import FieldRows from "./sections/FieldRows";
 
 const textFieldConfig = [
   { key: "site_brand_text", section: "navbar" },
@@ -41,14 +42,14 @@ const textFieldConfig = [
   { key: "home_offer_button_text", section: "home.offer" },
   { key: "home_offer_button_link", section: "home.offer" },
   { key: "home_offer_image", section: "home.offer" },
-  { key: "home_testimonials_title", section: "home.offer" },
-  { key: "home_testimonials_description", section: "home.offer" },
-  { key: "home_newsletter_title", section: "home.offer" },
-  { key: "home_newsletter_description", section: "home.offer" },
-  { key: "home_newsletter_button_text", section: "home.offer" },
-  { key: "home_newsletter_placeholder", section: "home.offer" },
-  { key: "home_newsletter_success", section: "home.offer" },
-  { key: "home_newsletter_error", section: "home.offer" },
+  { key: "home_testimonials_title", section: "home.testimonials" },
+  { key: "home_testimonials_description", section: "home.testimonials" },
+  { key: "home_newsletter_title", section: "home.newsletter" },
+  { key: "home_newsletter_description", section: "home.newsletter" },
+  { key: "home_newsletter_button_text", section: "home.newsletter" },
+  { key: "home_newsletter_placeholder", section: "home.newsletter" },
+  { key: "home_newsletter_success", section: "home.newsletter" },
+  { key: "home_newsletter_error", section: "home.newsletter" },
   { key: "footer_logo", section: "footer" },
   { key: "footer_description", section: "footer" },
   { key: "footer_contact_title", section: "footer" },
@@ -159,6 +160,8 @@ const defaultSectionStatus = {
   home_about: "active",
   home_company: "active",
   home_offer: "active",
+  home_testimonials: "active",
+  home_newsletter: "active",
   footer: "active",
   product: "active",
   contact: "active",
@@ -204,7 +207,9 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
     if (activeMainSection === "home") {
       if (activeHomeSection === "about") return "Home - About Settings";
       if (activeHomeSection === "company") return "Home - Company & Products Settings";
-      if (activeHomeSection === "offer") return "Home - Offer / Testimonial / Newsletter Settings";
+      if (activeHomeSection === "offer") return "Home - Offer Settings";
+      if (activeHomeSection === "testimonials") return "Home - Testimonials Settings";
+      if (activeHomeSection === "newsletter") return "Home - Newsletter Settings";
     }
     if (activeMainSection === "navbar") return "Navbar Settings";
     if (activeMainSection === "footer") return "Footer Settings";
@@ -686,6 +691,24 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
             toLabel={toLabel}
             toImageUrl={toImageUrl}
             uploadToSetting={uploadToSetting}
+          />
+        ) : null}
+
+        {activeMainSection === "home" && activeHomeSection === "testimonials" ? (
+          <FieldRows 
+            keys={getKeysFor("home.testimonials")} 
+            form={form} 
+            setField={setField} 
+            toLabel={toLabel} 
+          />
+        ) : null}
+
+        {activeMainSection === "home" && activeHomeSection === "newsletter" ? (
+          <FieldRows 
+            keys={getKeysFor("home.newsletter")} 
+            form={form} 
+            setField={setField} 
+            toLabel={toLabel} 
           />
         ) : null}
 

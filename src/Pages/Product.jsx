@@ -33,26 +33,38 @@ function Product() {
   }
 
   const heroImage = toAssetUrl(getSettingText(settings, 'product_page_hero_image', ''), '')
-  const heroTitle = getSettingText(settings, 'product_page_title', 'Product')
-  const breadcrumbHome = getSettingText(settings, 'product_page_breadcrumb_home', 'Home')
-  const breadcrumbCurrent = getSettingText(settings, 'product_page_breadcrumb_current', 'Product')
-
-  const showcaseKicker = getSettingText(settings, 'product_showcase_kicker', 'OUR PRODUCT')
-  const showcaseTitle = getSettingText(settings, 'product_showcase_title', 'TRY OUT A DIFFERENT HONEY & GHEE TASTE THIS TIME')
-  const showcaseText = getSettingText(
+  const heroTitle = getSettingText(settings, "product_page_title", "");
+  const breadcrumbHome = getSettingText(
     settings,
-    'product_showcase_text',
-    'SwiftSign General Trading offers a diverse range of premium honey and desi ghee products, carefully sourced and crafted to deliver exceptional taste and quality. With a strong focus on expertise and industry standards, we ensure natural freshness, rich flavor, and reliable quality in every product, giving customers a unique and satisfying experience every time',
-  )
-  const showcaseProducts = products.slice(0, 4)
+    "product_page_breadcrumb_home",
+    "",
+  );
+  const breadcrumbCurrent = getSettingText(
+    settings,
+    "product_page_breadcrumb_current",
+    "",
+  );
 
-  const catalogTitle = getSettingText(settings, 'product_catalog_title', 'Fresh Desi Ghee &')
-  const catalogTitleHighlight = getSettingText(settings, 'product_catalog_title_highlight', 'Honey')
+  const showcaseKicker = getSettingText(
+    settings,
+    "product_showcase_kicker",
+    "",
+  );
+  const showcaseTitle = getSettingText(settings, "product_showcase_title", "");
+  const showcaseText = getSettingText(settings, "product_showcase_text", "");
+  const showcaseProducts = products.slice(0, 4);
+
+  const catalogTitle = getSettingText(settings, "product_catalog_title", "");
+  const catalogTitleHighlight = getSettingText(
+    settings,
+    "product_catalog_title_highlight",
+    "",
+  );
   const catalogDescription = getSettingText(
     settings,
-    'product_catalog_description',
-    'Made from fresh and natural ingredients, our Sunflower Original Desi Ghee offers rich taste and premium quality.',
-  )
+    "product_catalog_description",
+    "",
+  );
 
   return (
     <main className="productPage" aria-label="Product page">

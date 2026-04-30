@@ -16,14 +16,14 @@ function Footer() {
     return `${backendBase}/${String(path).replace(/^\//, '')}`
   }
 
-  const brandText = getSettingText(settings, 'site_brand_text', 'Swift Sign')
+  const brandText = getSettingText(settings, "site_brand_text", "");
   const footerLogo = getSettingText(settings, 'footer_logo', '')
-  const footerDescription = getSettingText(
+  const footerDescription = getSettingText(settings, "footer_description", "");
+  const footerContactTitle = getSettingText(
     settings,
-    'footer_description',
-    'SwiftSign General Trading includes a broad range of activities, defined by expertise and industry practices',
-  )
-  const footerContactTitle = getSettingText(settings, 'footer_contact_title', 'CONTACT')
+    "footer_contact_title",
+    "",
+  );
   const contactAddress = getSettingText(
     settings,
     'footer_contact_address',
@@ -39,23 +39,34 @@ function Footer() {
     'footer_contact_email',
     getSettingText(settings, 'contact_email_text', getSettingText(settings, 'contact_email', 'info@swiftsigngeneraltrading.com')),
   )
-  const footerAccountTitle = getSettingText(settings, 'footer_account_title', 'MY ACCOUNT')
-  const footerNewsletterTitle = getSettingText(settings, 'footer_newsletter_title', 'NEWSLETTER')
+  const footerAccountTitle = getSettingText(
+    settings,
+    "footer_account_title",
+    "",
+  );
+  const footerNewsletterTitle = getSettingText(
+    settings,
+    "footer_newsletter_title",
+    "",
+  );
   const footerNewsletterDescription = getSettingText(
     settings,
-    'footer_newsletter_description',
-    'You will be notified when SwiftSign General Trading shares something new',
-  )
-  const footerCopyright = getSettingText(settings, 'footer_copyright', 'Copyright © 2026 All Rights Reserved.')
-  const footerCreditText = getSettingText(settings, 'footer_credit_text', 'Swift IT')
-  const footerCreditUrl = getSettingText(settings, 'footer_credit_url', 'https://it.swiftsignbm.com/')
-
-  const footerLinks = getSettingJson(settings, 'footer_links', [
-    { label: 'Home', path: '/' },
-    { label: 'About', path: '/about' },
-    { label: 'Product', path: '/product' },
-    { label: 'Contact', path: '/contact' },
-  ])
+    "footer_newsletter_description",
+    "",
+  );
+  const footerCopyright = getSettingText(settings, "footer_copyright", "");
+  const footerCreditText = getSettingText(settings, "footer_credit_text", "");
+  const footerCreditUrl = getSettingText(settings, "footer_credit_url", "");
+  const footerLinkHome = getSettingText(settings, "footer_link_home", "");
+  const footerLinkAbout = getSettingText(settings, "footer_link_about", "");
+  const footerLinkProduct = getSettingText(settings, "footer_link_product", "");
+  const footerLinkContact = getSettingText(settings, "footer_link_contact", "");
+  const footerLinks = [
+    { label: footerLinkHome, path: "/" },
+    { label: footerLinkAbout, path: "/about" },
+    { label: footerLinkProduct, path: "/product" },
+    { label: footerLinkContact, path: "/contact" },
+  ];
   const filteredFooterLinks = footerLinks.filter((item) => {
     if (item.path === '/about') return isSectionActive(settings, 'about', true)
     if (item.path === '/product') return isSectionActive(settings, 'product', true)
@@ -63,11 +74,7 @@ function Footer() {
     return true
   })
 
-  const footerSocials = getSettingJson(settings, 'footer_social_links', [
-    { label: 'Facebook', url: '#', icon: 'facebook' },
-    { label: 'TikTok', url: '#', icon: 'tiktok' },
-    { label: 'Instagram', url: '#', icon: 'instagram' },
-  ])
+  const footerSocials = getSettingJson(settings, "footer_social_links", []);
 
   useEffect(() => {
     const onScroll = () => {

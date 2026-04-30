@@ -75,6 +75,8 @@ function Home() {
   const homeAboutActive = isSectionActive(settings, 'home_about', true)
   const homeCompanyActive = isSectionActive(settings, 'home_company', true)
   const homeOfferActive = isSectionActive(settings, 'home_offer', true)
+  const homeTestimonialsActive = isSectionActive(settings, 'home_testimonials', true)
+  const homeNewsletterActive = isSectionActive(settings, 'home_newsletter', true)
   const backendBase = (import.meta.env.VITE_BACKEND_URL || 'http://localhost/honey-ghee/backend').replace(/\/$/, '')
   const toAssetUrl = (path, fallback) => {
     if (!path) return fallback
@@ -82,81 +84,142 @@ function Home() {
     return `${backendBase}/${String(path).replace(/^\//, '')}`
   }
 
-  const aboutKicker = getSettingText(settings, 'home_about_kicker', 'Information')
-  const aboutTitle = getSettingText(settings, 'home_about_title', 'About Honey & Desi Ghee')
+  const aboutKicker = getSettingText(settings, "home_about_kicker", "");
+  const aboutTitle = getSettingText(settings, "home_about_title", "");
   const aboutDescription = getSettingText(
     settings,
-    'home_about_description',
-    'Our honey is collected from natural floral sources and packed with taste and nutrients. Our desi ghee is prepared using traditional methods to deliver rich aroma, purity, and everyday goodness.',
-  )
-  const aboutButtonText = getSettingText(settings, 'home_about_button_text', 'Read more')
-  const aboutButtonLink = getSettingText(settings, 'home_about_button_link', '/about')
-  const aboutImage = toAssetUrl(getSettingText(settings, 'home_about_image', ''), '')
-  const aboutPropertiesTitle = getSettingText(settings, 'home_about_properties_title', 'Useful Properties Of Honey & Desi Ghee')
-  const aboutProperties = getSettingJson(settings, 'home_about_properties', [])
-
-  const gheeCards = getSettingJson(settings, 'home_ghee_cards', [])
-
-  const aboutCompanyKicker = getSettingText(settings, 'home_company_kicker', 'About our Company')
-  const aboutCompanyTitle = getSettingText(settings, 'home_company_title', 'Cow Desi Ghee')
-  const aboutCompanyAccent = getSettingText(settings, 'home_company_accent', '100% Natural')
-  const aboutCompanySuffix = getSettingText(settings, 'home_company_suffix', '& Traditional Goodness')
-  const aboutCompanyText = getSettingText(
+    "home_about_description",
+    "",
+  );
+  const aboutButtonText = getSettingText(
     settings,
-    'home_company_text',
-    'Our Pure Cow Desi Ghee is made from 100% natural and fresh cow milk, ensuring premium quality and rich taste. Prepared using traditional methods, this ghee is completely pure, chemical-free, and full of natural aroma and flavor.',
-  )
-  const aboutCompanyImage = toAssetUrl(getSettingText(settings, 'home_company_image', ''), '')
-  const aboutCompanyButtonText = getSettingText(settings, 'home_company_button_text', 'MORE ABOUT')
-  const aboutCompanyButtonLink = getSettingText(settings, 'home_company_button_link', '/about')
+    "home_about_button_text",
+    "",
+  );
+  const aboutButtonLink = getSettingText(
+    settings,
+    "home_about_button_link",
+    "",
+  );
+  const aboutImage = toAssetUrl(
+    getSettingText(settings, "home_about_image", ""),
+    "",
+  );
+  const aboutPropertiesTitle = getSettingText(
+    settings,
+    "home_about_properties_title",
+    "",
+  );
+  const aboutProperties = getSettingJson(settings, "home_about_properties", []);
 
-  const productsSectionTitle = getSettingText(settings, 'home_products_title', 'Fresh Desi Ghee & Honey')
+  const gheeCards = getSettingJson(settings, "home_ghee_cards", []);
+
+  const aboutCompanyKicker = getSettingText(
+    settings,
+    "home_company_kicker",
+    "",
+  );
+  const aboutCompanyTitle = getSettingText(settings, "home_company_title", "");
+  const aboutCompanyAccent = getSettingText(
+    settings,
+    "home_company_accent",
+    "",
+  );
+  const aboutCompanySuffix = getSettingText(
+    settings,
+    "home_company_suffix",
+    "",
+  );
+  const aboutCompanyText = getSettingText(settings, "home_company_text", "");
+  const aboutCompanyImage = toAssetUrl(
+    getSettingText(settings, "home_company_image", ""),
+    "",
+  );
+  const aboutCompanyButtonText = getSettingText(
+    settings,
+    "home_company_button_text",
+    "",
+  );
+  const aboutCompanyButtonLink = getSettingText(
+    settings,
+    "home_company_button_link",
+    "",
+  );
+
+  const productsSectionTitle = getSettingText(
+    settings,
+    "home_products_title",
+    "",
+  );
   const productsSectionDescription = getSettingText(
     settings,
-    'home_products_description',
-    'Experience the purity of our fresh, 100% natural Desi Ghee and Honey. Rich in taste and nutrients, perfect for a healthy and delicious lifestyle.',
-  )
+    "home_products_description",
+    "",
+  );
 
-  const offerTitle = getSettingText(settings, 'home_offer_title', 'Fresh Cow')
-  const offerAccent = getSettingText(settings, 'home_offer_accent', 'Original Desi Ghee')
-  const offerText = getSettingText(
+  const offerTitle = getSettingText(settings, "home_offer_title", "");
+  const offerAccent = getSettingText(settings, "home_offer_accent", "");
+  const offerText = getSettingText(settings, "home_offer_description", "");
+  const offerButtonText = getSettingText(
     settings,
-    'home_offer_description',
-    'Made from fresh and natural ingredients, our Original Desi Ghee offers rich taste and premium quality. Perfect for everyday cooking.',
-  )
-  const offerButtonText = getSettingText(settings, 'home_offer_button_text', 'SHOP NOW')
-  const offerButtonLink = getSettingText(settings, 'home_offer_button_link', '/product')
-  const offerImage = toAssetUrl(getSettingText(settings, 'home_offer_image', ''), '')
+    "home_offer_button_text",
+    "",
+  );
+  const offerButtonLink = getSettingText(
+    settings,
+    "home_offer_button_link",
+    "",
+  );
+  const offerImage = toAssetUrl(
+    getSettingText(settings, "home_offer_image", ""),
+    "",
+  );
 
-  const clientsTitle = getSettingText(settings, 'home_testimonials_title', 'What Our Clients Say')
+  const clientsTitle = getSettingText(settings, "home_testimonials_title", "");
   const clientsDescription = getSettingText(
     settings,
-    'home_testimonials_description',
-    'Our customers love our pure honey and desi ghee. Read what they have to say about their experience.',
-  )
+    "home_testimonials_description",
+    "",
+  );
 
-  const newsletterTitle = getSettingText(settings, 'home_newsletter_title', 'Subscribe To Our Newsletter')
+  const newsletterTitle = getSettingText(settings, "home_newsletter_title", "");
   const newsletterDescription = getSettingText(
     settings,
-    'home_newsletter_description',
-    'Subscribe to our latest newsletter to get news about special discount.',
-  )
-  const newsletterButtonText = getSettingText(settings, 'home_newsletter_button_text', 'SUBSCRIBE')
-  const newsletterPlaceholder = getSettingText(settings, 'home_newsletter_placeholder', 'Email')
-  const newsletterSuccessText = getSettingText(settings, 'home_newsletter_success', 'Thanks! You are subscribed.')
-  const newsletterErrorText = getSettingText(settings, 'home_newsletter_error', 'Please enter a valid email address.')
+    "home_newsletter_description",
+    "",
+  );
+  const newsletterButtonText = getSettingText(
+    settings,
+    "home_newsletter_button_text",
+    "",
+  );
+  const newsletterPlaceholder = getSettingText(
+    settings,
+    "home_newsletter_placeholder",
+    "",
+  );
+  const newsletterSuccessText = getSettingText(
+    settings,
+    "home_newsletter_success",
+    "",
+  );
+  const newsletterErrorText = getSettingText(
+    settings,
+    "home_newsletter_error",
+    "",
+  );
 
   const slides = useMemo(
     () =>
       (Array.isArray(apiHeroSlides) ? apiHeroSlides : []).map((slide) => ({
         image: slide.image,
-        title: String(slide.title || '').trim(),
-        subtitle: String(slide.subtitle || '').trim(),
-        buttonText: slide.buttonText || 'SHOP NOW',
-        buttonLink: slide.buttonLink || '/product',
+        title: String(slide.title || "").trim(),
+        subtitle: String(slide.subtitle || "").trim(),
+        buttonText: slide.buttonText || "",
+        buttonLink: slide.buttonLink || "",
       })),
     [apiHeroSlides],
-  )
+  );
 
   const heroSlides = useMemo(() => {
     if (!slides.length) return []
@@ -503,7 +566,7 @@ function Home() {
       </section>
       ) : null}
 
-      {homeOfferActive ? (
+      {homeTestimonialsActive ? (
       <section className="clientsSection" aria-label="Our clients testimonials">
         <div className="clientsInner">
           <h2 className="clientsTitle" data-aos="fade-down" data-aos-duration="1000">{clientsTitle}</h2>
@@ -554,7 +617,7 @@ function Home() {
       </section>
       ) : null}
 
-      {homeOfferActive ? (
+      {homeNewsletterActive ? (
       <section className="newsletterSection" aria-label="Newsletter subscription">
         <div className="newsletterCard">
           <div className="newsletterDecor newsletterDecor--left" aria-hidden="true">

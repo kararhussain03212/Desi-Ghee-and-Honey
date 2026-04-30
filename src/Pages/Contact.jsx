@@ -23,38 +23,70 @@ function Contact() {
   }
 
   const heroImage = toAssetUrl(getSettingText(settings, 'contact_page_hero_image', ''), about1)
-  const pageTitle = getSettingText(settings, 'contact_page_title', 'Contact')
-  const breadcrumbHome = getSettingText(settings, 'contact_page_breadcrumb_home', 'Home')
-  const breadcrumbCurrent = getSettingText(settings, 'contact_page_breadcrumb_current', 'Contact')
+  const pageTitle = getSettingText(settings, "contact_page_title", "");
+  const breadcrumbHome = getSettingText(
+    settings,
+    "contact_page_breadcrumb_home",
+    "",
+  );
+  const breadcrumbCurrent = getSettingText(
+    settings,
+    "contact_page_breadcrumb_current",
+    "",
+  );
 
-  const sectionTitle = getSettingText(settings, 'contact_section_title', 'Our Contacts')
+  const sectionTitle = getSettingText(settings, "contact_section_title", "");
   const sectionDescription = getSettingText(
     settings,
-    'contact_section_description',
-    'Swift Sign Trading offers premium Desi Ghee and Natural Honey made from 100% natural ingredients. We ensure quality, freshness, and authentic taste in every product.',
-  )
-  const locationTitle = getSettingText(settings, 'contact_location_title', 'Our Location')
-  const locationText = getSettingText(settings, 'contact_location_text', 'I-8 Markaz I 8 Markaz I-8, Islamabad, Pakistan')
-  const phoneTitle = getSettingText(settings, 'contact_phone_title', 'Phone')
-  const phoneText = getSettingText(settings, 'contact_phone_text', getSettingText(settings, 'contact_phone', '+92 333 8399480'))
-  const emailTitle = getSettingText(settings, 'contact_email_title', 'Email')
-  const emailText = getSettingText(settings, 'contact_email_text', getSettingText(settings, 'contact_email', 'info@swiftsigngeneraltrading.com'))
+    "contact_section_description",
+    "",
+  );
+  const locationTitle = getSettingText(settings, "contact_location_title", "");
+  const locationText = getSettingText(settings, "contact_location_text", "");
+  const phoneTitle = getSettingText(settings, "contact_phone_title", "");
+  const phoneText = getSettingText(settings, "contact_phone_text", "");
+  const emailTitle = getSettingText(settings, "contact_email_title", "");
+  const emailText = getSettingText(settings, "contact_email_text", "");
 
-  const formTitle = getSettingText(settings, 'contact_form_title', 'Quick Contact Form')
-  const formNamePlaceholder = getSettingText(settings, 'contact_form_name_placeholder', 'Name')
-  const formLastnamePlaceholder = getSettingText(settings, 'contact_form_lastname_placeholder', 'Lastname')
-  const formEmailPlaceholder = getSettingText(settings, 'contact_form_email_placeholder', 'Email')
-  const formSubjectPlaceholder = getSettingText(settings, 'contact_form_subject_placeholder', 'Subject')
-  const formMessagePlaceholder = getSettingText(settings, 'contact_form_message_placeholder', 'Message')
-  const formButtonText = getSettingText(settings, 'contact_form_button_text', 'SEND MESSAGE')
-  const whatsappPrefix = getSettingText(settings, 'contact_form_whatsapp_prefix', 'Contact Form Submission')
-
-  const mapTitle = getSettingText(settings, 'contact_map_title', 'Map')
-  const mapEmbedUrl = getSettingText(
+  const formTitle = getSettingText(settings, "contact_form_title", "");
+  const formNamePlaceholder = getSettingText(
     settings,
-    'contact_map_embed_url',
-    'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3319.8!2d73.0759443!3d33.6711939!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38df95459918a25f:0x46495cfc8ce0a1a3!2sI-8%20Markaz%2C%20Islamabad%2C%20Pakistan!5e0!3m2!1sen!2spk!4v1713177600000',
-  )
+    "contact_form_name_placeholder",
+    "",
+  );
+  const formLastnamePlaceholder = getSettingText(
+    settings,
+    "contact_form_lastname_placeholder",
+    "",
+  );
+  const formEmailPlaceholder = getSettingText(
+    settings,
+    "contact_form_email_placeholder",
+    "",
+  );
+  const formSubjectPlaceholder = getSettingText(
+    settings,
+    "contact_form_subject_placeholder",
+    "",
+  );
+  const formMessagePlaceholder = getSettingText(
+    settings,
+    "contact_form_message_placeholder",
+    "",
+  );
+  const formButtonText = getSettingText(
+    settings,
+    "contact_form_button_text",
+    "",
+  );
+  const whatsappPrefix = getSettingText(
+    settings,
+    "contact_form_whatsapp_prefix",
+    "",
+  );
+
+  const mapTitle = getSettingText(settings, "contact_map_title", "");
+  const mapEmbedUrl = getSettingText(settings, "contact_map_embed_url", "");
   const whatsappNumber = toWhatsAppDigits(getSettingText(settings, 'whatsapp_number', '923338399480'))
 
   const [formData, setFormData] = useState({

@@ -33,39 +33,73 @@ function About() {
   }
 
   const heroImage = toAssetUrl(getSettingText(settings, 'about_page_hero_image', ''), '')
-  const pageTitle = getSettingText(settings, 'about_page_title', 'About Us')
-  const breadcrumbHome = getSettingText(settings, 'about_page_breadcrumb_home', 'Home')
-  const breadcrumbCurrent = getSettingText(settings, 'about_page_breadcrumb_current', 'About')
+  const pageTitle = getSettingText(settings, "about_page_title", "");
+  const breadcrumbHome = getSettingText(
+    settings,
+    "about_page_breadcrumb_home",
+    "",
+  );
+  const breadcrumbCurrent = getSettingText(
+    settings,
+    "about_page_breadcrumb_current",
+    "",
+  );
 
-  const infoKicker = getSettingText(settings, 'about_page_info_kicker', 'Information')
-  const infoTitle = getSettingText(settings, 'about_page_info_title', 'About Honey & Desi Ghee')
+  const infoKicker = getSettingText(settings, "about_page_info_kicker", "");
+  const infoTitle = getSettingText(settings, "about_page_info_title", "");
   const infoDescription = getSettingText(
     settings,
-    'about_page_info_description',
-    'Our honey is collected from natural floral sources and packed with taste and nutrients. Our desi ghee is prepared using traditional methods to deliver rich aroma, purity, and everyday goodness.',
-  )
-  const infoImage = toAssetUrl(getSettingText(settings, 'about_page_info_image', ''), '')
+    "about_page_info_description",
+    "",
+  );
+  const infoImage = toAssetUrl(
+    getSettingText(settings, "about_page_info_image", ""),
+    "",
+  );
 
-  const propertiesTitle = getSettingText(settings, 'about_page_properties_title', 'Useful Properties Of Honey & Desi Ghee')
-  const properties = getSettingJson(settings, 'about_page_properties', [])
+  const propertiesTitle = getSettingText(
+    settings,
+    "about_page_properties_title",
+    "",
+  );
+  const properties = getSettingJson(settings, "about_page_properties", []);
 
-  const companyKicker = getSettingText(settings, 'about_page_company_kicker', 'About our Company')
-  const companyTitle = getSettingText(settings, 'about_page_company_title', 'Cow Desi Ghee')
-  const companyAccent = getSettingText(settings, 'about_page_company_accent', '100% Natural')
-  const companySuffix = getSettingText(settings, 'about_page_company_suffix', '& Traditional Goodness')
+  const companyKicker = getSettingText(
+    settings,
+    "about_page_company_kicker",
+    "",
+  );
+  const companyTitle = getSettingText(settings, "about_page_company_title", "");
+  const companyAccent = getSettingText(
+    settings,
+    "about_page_company_accent",
+    "",
+  );
+  const companySuffix = getSettingText(
+    settings,
+    "about_page_company_suffix",
+    "",
+  );
   const companyDescription = getSettingText(
     settings,
-    'about_page_company_description',
-    'Our Pure Cow Desi Ghee is made from 100% natural and fresh cow milk, ensuring premium quality and rich taste. Prepared using traditional methods, this ghee is completely pure, chemical-free, and full of natural aroma and flavor. It enhances the taste of your everyday meals like roti, paratha, rice, and various dishes.',
-  )
-  const companyImage = toAssetUrl(getSettingText(settings, 'about_page_company_image', ''), '')
+    "about_page_company_description",
+    "",
+  );
+  const companyImage = toAssetUrl(
+    getSettingText(settings, "about_page_company_image", ""),
+    "",
+  );
 
-  const categoryTitle = getSettingText(settings, 'about_page_category_title', 'Our Honey Category')
+  const categoryTitle = getSettingText(
+    settings,
+    "about_page_category_title",
+    "",
+  );
   const categoryDescription = getSettingText(
     settings,
-    'about_page_category_description',
-    'Explore our premium honey collection, carefully selected to bring you the purest taste of nature. Our honey range includes high-quality, 100% natural varieties that are rich in flavor and packed with essential nutrients.',
-  )
+    "about_page_category_description",
+    "",
+  );
   const categoryImage = toAssetUrl(getSettingText(settings, 'about_page_category_image', ''), '')
 
   const categories = getSettingJson(settings, 'about_page_categories', [])

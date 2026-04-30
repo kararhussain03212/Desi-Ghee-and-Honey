@@ -193,6 +193,22 @@ export default function App() {
             }
           />
           <Route
+            path="/settings/home-testimonials"
+            element={
+              <ProtectedPage>
+                <SiteSettings forcedMainSection="home" forcedHomeSection="testimonials" />
+              </ProtectedPage>
+            }
+          />
+          <Route
+            path="/settings/home-newsletter"
+            element={
+              <ProtectedPage>
+                <SiteSettings forcedMainSection="home" forcedHomeSection="newsletter" />
+              </ProtectedPage>
+            }
+          />
+          <Route
             path="/settings/footer"
             element={
               <ProtectedPage>
