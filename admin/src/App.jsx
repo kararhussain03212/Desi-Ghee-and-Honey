@@ -35,8 +35,13 @@ function AdminOnlyPage({ children }) {
 
 export default function App() {
   const basename =
-    typeof window !== "undefined" && window.location.pathname.startsWith("/admin")
-      ? "/admin"
+    typeof window !== "undefined"
+      ? (() => {
+          const { pathname } = window.location;
+          const adminIndex = pathname.indexOf("/admin");
+          if (adminIndex === -1) return undefined;
+          return pathname.slice(0, adminIndex + "/admin".length);
+        })()
       : undefined;
 
   return (
