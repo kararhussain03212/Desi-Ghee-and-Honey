@@ -2,12 +2,11 @@
   RewriteEngine On
   RewriteBase /admin/
 
-  # If file or folder exists, serve it
-  RewriteRule ^index\.html$ - [L]
+  # Serve existing files/directories directly
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # Otherwise redirect everything to index.html
-  RewriteRule . index.html [L]
+  # Admin SPA fallback
+  RewriteRule . /admin/index.html [L]
 </IfModule>

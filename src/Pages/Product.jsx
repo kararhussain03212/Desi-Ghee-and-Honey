@@ -3,6 +3,7 @@ import { FaRegStar, FaStar, FaStarHalfAlt } from 'react-icons/fa'
 import { formatRs } from '../utils/money.js'
 import { useContent } from '../context/content.js'
 import { getSettingText, isSectionActive } from '../utils/siteSettings.js'
+import { getBackendBaseUrl } from '../utils/runtimeApi.js'
 import '../App.css'
 
 function getRatingStars(rating) {
@@ -25,11 +26,12 @@ function Product() {
     return <Navigate to="/" replace />
   }
 
-  const backendBase = (import.meta.env.VITE_BACKEND_URL || 'http://localhost/honey-ghee/backend').replace(/\/$/, '')
+  const backendBase = getBackendBaseUrl()
   const toAssetUrl = (path, fallback) => {
     if (!path) return fallback
     if (/^https?:\/\//i.test(path)) return path
-    return `${backendBase}/${String(path).replace(/^\//, '')}`
+    const normalizedPath = String(path).replace(/^\//, '').replace(/^backend\//i, '')
+    return `${backendBase}/${normalizedPath}`
   }
 
   const heroImage = toAssetUrl(getSettingText(settings, 'product_page_hero_image', ''), '')

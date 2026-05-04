@@ -8,27 +8,27 @@ final class Router
 {
     private array $routes = [];
 
-    public function get(string $path, callable|array $handler, array $middleware = []): void
+    public function get(string $path, $handler, array $middleware = []): void
     {
         $this->add('GET', $path, $handler, $middleware);
     }
 
-    public function post(string $path, callable|array $handler, array $middleware = []): void
+    public function post(string $path, $handler, array $middleware = []): void
     {
         $this->add('POST', $path, $handler, $middleware);
     }
 
-    public function put(string $path, callable|array $handler, array $middleware = []): void
+    public function put(string $path, $handler, array $middleware = []): void
     {
         $this->add('PUT', $path, $handler, $middleware);
     }
 
-    public function patch(string $path, callable|array $handler, array $middleware = []): void
+    public function patch(string $path, $handler, array $middleware = []): void
     {
         $this->add('PATCH', $path, $handler, $middleware);
     }
 
-    public function delete(string $path, callable|array $handler, array $middleware = []): void
+    public function delete(string $path, $handler, array $middleware = []): void
     {
         $this->add('DELETE', $path, $handler, $middleware);
     }
@@ -36,10 +36,14 @@ final class Router
     public function dispatch(string $method, string $uri): void
     {
         $method = strtoupper($method);
+        $uri = '/' . ltrim((string) $uri, '/');
+        if ($uri !== '/') {
+            $uri = rtrim($uri, '/');
+        }
 
         foreach ($this->routes[$method] ?? [] as $route) {
             $pattern = preg_replace('/\{([a-zA-Z_]+)\}/', '(?P<$1>[^/]+)', $route['path']);
-            $pattern = '#^' . $pattern . '$#';
+            $pattern = '#^' . rtrim($pattern, '/') . '/?$#';
 
             if (!preg_match($pattern, $uri, $matches)) {
                 continue;
@@ -66,7 +70,7 @@ final class Router
         Response::error('Endpoint not found', 404);
     }
 
-    private function add(string $method, string $path, callable|array $handler, array $middleware): void
+    private function add(string $method, string $path, $handler, array $middleware): void
     {
         $this->routes[$method][] = [
             'path' => $path,

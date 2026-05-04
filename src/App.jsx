@@ -25,6 +25,7 @@ function App() {
 
   return (
     <div className="app">
+      {contactActive ? <FloatingWhatsApp /> : null}
       <ScrollToTop />
       {isHome && navbarActive ? <Marco /> : null}
       {navbarActive ? <NavBar /> : null}
@@ -39,7 +40,6 @@ function App() {
         </Routes>
       </main>
       {footerActive ? <Footer /> : null}
-      {contactActive ? <FloatingWhatsApp /> : null}
     </div>
   )
 }

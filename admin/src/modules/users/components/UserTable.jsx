@@ -1,3 +1,5 @@
+import { getBackendRoot } from "../../../api/runtimeApi";
+
 export default function UserTable({
   users,
   loading,
@@ -11,7 +13,7 @@ export default function UserTable({
     const raw = String(value || "").trim();
     if (!raw) return "";
     if (/^https?:\/\//i.test(raw)) return raw;
-    const apiRoot = (import.meta.env.VITE_API_URL || "").replace(/\/api\/?$/, "");
+    const apiRoot = getBackendRoot();
     if (!apiRoot) return raw;
     if (raw.startsWith("/")) return `${apiRoot}${raw}`;
     return `${apiRoot}/uploads/${raw}`;
@@ -35,7 +37,8 @@ export default function UserTable({
   if (loading) return <p className="text-white/70">Loading users...</p>;
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card)]">
+    <>
+    <div className="overflow-x-auto rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card)] hidden md:block">
       <table className="min-w-full divide-y divide-[var(--admin-border)] text-sm">
         <thead className="bg-[var(--admin-bg)] text-left text-xs font-semibold uppercase tracking-widest text-[var(--admin-muted)]">
           <tr>
@@ -82,7 +85,7 @@ export default function UserTable({
                   ) : null}
                 </td>
                 <td className="px-4 py-3 text-white/85">
-                  <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300 capitalize">{user.status}</span>
+                  <span className={String(user.status || "").toLowerCase() === "inactive" ? "rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-300 capitalize" : "rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300 capitalize"}>{user.status}</span>
                 </td>
                 <td className="px-4 py-3 text-white/85">{formatDateTime(user.last_login_at)}</td>
                 <td className="px-4 py-3">
@@ -114,5 +117,38 @@ export default function UserTable({
         </tbody>
       </table>
     </div>
+    <div className="space-y-3 md:hidden">
+      {users.length === 0 ? (
+        <div className="rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card)] px-4 py-6 text-white/70">No users found.</div>
+      ) : (
+        users.map((user) => (
+          <article key={`mobile-${user._id || user.id}`} className="rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-card)] p-4">
+            <div className="flex items-start gap-3">
+              {resolveProfilePhoto(user.profile_photo) ? (
+                <img src={resolveProfilePhoto(user.profile_photo)} alt={user.name || "User"} className="h-10 w-10 rounded-full border border-[var(--admin-border)] object-cover" />
+              ) : (
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--admin-border)] bg-[#ffc107] text-sm font-bold text-black">{getInitials(user.name)}</div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-semibold text-white">{user.name}</p>
+                <p className="truncate text-xs text-[var(--admin-muted)]">{user.email}</p>
+                <p className="mt-1 text-xs text-[var(--admin-muted)]">Last login: {formatDateTime(user.last_login_at)}</p>
+              </div>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2 text-xs">
+              <span className="rounded-lg border border-[var(--admin-border)] bg-white/5 px-2.5 py-1 font-semibold capitalize">{user.role}</span>
+              <span className={String(user.status || "").toLowerCase() === "inactive" ? "rounded-full border border-red-500/40 bg-red-500/10 px-2.5 py-1 font-semibold text-red-300 capitalize" : "rounded-full border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-1 font-semibold text-emerald-300 capitalize"}>{user.status}</span>
+              {user.is_super_admin ? <span className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 font-semibold text-amber-200">Super Admin</span> : null}
+            </div>
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              <button type="button" onClick={() => onView(user)} className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg)] px-3 py-2 text-xs text-white/90">View</button>
+              <button type="button" onClick={() => onEdit(user)} disabled={!canEditUsers || user.is_super_admin} className="rounded-lg border border-blue-500/40 bg-blue-500/20 px-3 py-2 text-xs text-blue-200 disabled:opacity-50">Edit</button>
+              <button type="button" onClick={() => onDelete(user)} disabled={!canDeleteUsers || user.is_super_admin} className="rounded-lg border border-red-500/40 bg-red-500/20 px-3 py-2 text-xs text-red-200 disabled:opacity-50">Delete</button>
+            </div>
+          </article>
+        ))
+      )}
+    </div>
+    </>
   );
 }

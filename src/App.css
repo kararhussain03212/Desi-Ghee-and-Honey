@@ -4214,8 +4214,8 @@
 /* ===== Floating WhatsApp Button ===== */
 .floatingWhatsApp {
   position: fixed;
-  bottom: 20px;
-  right: 60px;
+  bottom: 70px;
+  right: 18px;
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -4287,8 +4287,8 @@
 /* Mobile responsive */
 @media (max-width: 640px) {
   .floatingWhatsApp {
-    bottom: 20px;
-    right: 20px;
+    bottom: 80px;
+    right: 12px;
     width: 56px;
     height: 56px;
   }
@@ -4306,8 +4306,8 @@
 /* Tablet responsive */
 @media (max-width: 768px) {
   .floatingWhatsApp {
-    bottom: 25px;
-    right: 25px;
+    bottom: 85px;
+    right: 15px;
   }
 }
 

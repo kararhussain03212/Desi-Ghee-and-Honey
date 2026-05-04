@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { deleteSlider, getSliders, updateSlider } from "../../api/sliderApi";
 import { useAuth } from "../../context/useAuth";
-import { normalizeUserRole } from "../../modules/users/constants";
+import { hasPermission } from "../../modules/users/constants";
+import { getBackendRoot } from "../../api/runtimeApi";
 
 const FALLBACK_IMAGE = `data:image/svg+xml;utf8,${encodeURIComponent(
   "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 700'><rect width='1200' height='700' fill='#171717'/><text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle' fill='#ffffff' font-family='Arial,sans-serif' font-size='58'>Slider</text></svg>",
@@ -16,12 +17,10 @@ export default function SliderList() {
   const [error, setError] = useState("");
   const [toast, setToast] = useState({ show: false, text: "" });
 
-  const isAdmin = normalizeUserRole(user?.role) === "admin";
-  const permissions = Array.isArray(user?.permissions) ? user.permissions : [];
-  const canAdd = isAdmin || permissions.includes("add_data");
-  const canEdit = isAdmin || permissions.includes("edit_data");
-  const canDelete = isAdmin || permissions.includes("delete_data");
-  const canPublish = isAdmin || permissions.includes("publish_data");
+  const canAdd = hasPermission(user, "add_data");
+  const canEdit = hasPermission(user, "edit_data");
+  const canDelete = hasPermission(user, "delete_data");
+  const canPublish = hasPermission(user, "publish_data");
 
   const showNoPerm = (action) => setToast({ show: true, text: `You do not have permission to ${action}.` });
 
@@ -31,10 +30,7 @@ export default function SliderList() {
     return () => clearTimeout(t);
   }, [toast]);
 
-  const apiRoot = useMemo(() => {
-    const base = import.meta.env.VITE_API_URL || "";
-    return base.replace(/\/api\/?$/, "");
-  }, []);
+  const apiRoot = useMemo(() => getBackendRoot(), []);
 
   const resolveImage = (value) => {
     if (!value) return FALLBACK_IMAGE;
@@ -183,7 +179,7 @@ export default function SliderList() {
                         className={
                           item.status === "active"
                             ? "rounded-lg bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700"
-                            : "rounded-lg bg-gray-600 px-4 py-2 text-sm text-white hover:bg-gray-700"
+                            : "rounded-lg bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
                         }
                       >
                         {item.status === "active" ? "Active" : "Inactive"}

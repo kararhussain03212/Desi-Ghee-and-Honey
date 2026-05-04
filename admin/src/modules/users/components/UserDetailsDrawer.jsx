@@ -38,7 +38,7 @@ export default function UserDetailsDrawer({ open, user, onClose }) {
             <p className="text-xs font-semibold uppercase tracking-widest text-[var(--admin-muted)]">Profile</p>
             <div className="mt-3 space-y-2 text-sm">
               <div className="flex items-center justify-between"><span className="text-white/70">Role</span><span className="font-semibold capitalize text-white">{user?.role || "-"}</span></div>
-              <div className="flex items-center justify-between"><span className="text-white/70">Status</span><span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300 capitalize">{user?.status || "-"}</span></div>
+              <div className="flex items-center justify-between"><span className="text-white/70">Status</span><span className={String(user?.status || "").toLowerCase() === "inactive" ? "rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-xs font-semibold text-red-300 capitalize" : "rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-300 capitalize"}>{user?.status || "-"}</span></div>
               <div className="flex items-center justify-between"><span className="text-white/70">Last Login</span><span className="text-white">{formatDateTime(user?.last_login_at)}</span></div>
               <div className="flex items-center justify-between"><span className="text-white/70">Created</span><span className="text-white">{formatDateTime(user?.created_at)}</span></div>
             </div>

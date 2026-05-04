@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Backend\Controllers;
 
-use Backend\Utils\ActivityLogger;
 use Backend\Utils\FileUpload;
 use Backend\Utils\Response;
 
 require_once __DIR__ . '/BaseController.php';
-require_once __DIR__ . '/../utils/ActivityLogger.php';
 require_once __DIR__ . '/../utils/FileUpload.php';
 require_once __DIR__ . '/../utils/Response.php';
 
@@ -25,7 +23,6 @@ final class UploadController extends BaseController
         }
 
         $uploaded = FileUpload::upload($file, $folder);
-        ActivityLogger::log($this->currentAdminId(), 'upload', 'files', null);
 
         Response::success($uploaded, 'File uploaded successfully', 201);
     }

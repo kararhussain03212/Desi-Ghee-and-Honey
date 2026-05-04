@@ -19,19 +19,25 @@ final class CorsMiddleware
         )));
 
         $requestOrigin = $_SERVER['HTTP_ORIGIN'] ?? '';
-        $allowedOrigin = '*';
+        $allowedOrigin = null;
 
         if ($allowedOrigins !== []) {
             if (in_array('*', $allowedOrigins, true)) {
                 $allowedOrigin = '*';
             } elseif ($requestOrigin !== '' && in_array($requestOrigin, $allowedOrigins, true)) {
                 $allowedOrigin = $requestOrigin;
-            } else {
-                $allowedOrigin = $allowedOrigins[0];
             }
         }
 
-        header('Access-Control-Allow-Origin: ' . $allowedOrigin);
+        if ($allowedOrigin !== null) {
+            header('Access-Control-Allow-Origin: ' . $allowedOrigin);
+        }
+        header('X-Frame-Options: SAMEORIGIN');
+        header('X-Content-Type-Options: nosniff');
+        header('Referrer-Policy: strict-origin-when-cross-origin');
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+        header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+        header("Content-Security-Policy: default-src 'self'; base-uri 'self'; frame-ancestors 'self'; object-src 'none'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https:; worker-src 'self' blob:; manifest-src 'self'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content");
         header('Access-Control-Allow-Credentials: true');
         header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
         header('Access-Control-Allow-Headers: Content-Type, Authorization, X-CSRF-Token');

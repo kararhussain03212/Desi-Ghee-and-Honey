@@ -238,7 +238,7 @@ export function AuthProvider({ children }) {
       const nextToken = payload?.token || data?.token;
 
       if (!nextToken) {
-        throw new Error("Login failed");
+        throw new Error("Login failed: API response did not include a token. Check admin API URL/deployment.");
       }
 
       const jwtPayload = parseJwtPayload(nextToken);

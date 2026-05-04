@@ -14,7 +14,7 @@ abstract class BaseController
     {
         $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
 
-        if (str_contains($contentType, 'application/json')) {
+        if (strpos($contentType, 'application/json') !== false) {
             $raw = file_get_contents('php://input') ?: '{}';
             $decoded = json_decode($raw, true);
             return is_array($decoded) ? $decoded : [];

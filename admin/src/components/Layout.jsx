@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth.js";
 import foodLogo from "../assets/images/web_logo.png";
 import { normalizeUserRole } from "../modules/users/constants";
+import { getBackendRoot } from "../api/runtimeApi";
 
 const navItems = [
   { path: "/dashboard", label: "Dashboard" },
@@ -107,7 +108,7 @@ export default function Layout({ children }) {
     const raw = String(value || "").trim();
     if (!raw) return "";
     if (/^https?:\/\//i.test(raw)) return raw;
-    const apiRoot = (import.meta.env.VITE_API_URL || "").replace(/\/api\/?$/, "");
+    const apiRoot = getBackendRoot();
     if (!apiRoot) return raw;
     if (raw.startsWith("/")) return `${apiRoot}${raw}`;
     return `${apiRoot}/uploads/${raw}`;

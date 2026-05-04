@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import ImageUpload from "../../components/ImageUpload";
 import { createSlider, getSlider, updateSlider } from "../../api/sliderApi";
 import { uploadImage } from "../../api/uploadApi";
+import { getBackendRoot } from "../../api/runtimeApi";
 
 const getInitialForm = () => ({
   titleLine1: "",
@@ -27,10 +28,7 @@ export default function SliderForm() {
   const [error, setError] = useState("");
   const [form, setForm] = useState(getInitialForm);
 
-  const apiRoot = useMemo(() => {
-    const base = import.meta.env.VITE_API_URL || "";
-    return base.replace(/\/api\/?$/, "");
-  }, []);
+  const apiRoot = useMemo(() => getBackendRoot(), []);
 
   const toImageUrl = useCallback(
     (value) => {

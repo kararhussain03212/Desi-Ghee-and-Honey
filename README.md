@@ -1,3 +1,20 @@
+frontend
+npm install
+npm run dev
+
+admin
+cd admin
+npm install
+npm run dev
+
+
+backend
+cd backend
+php -S localhost:5000
+
+
+
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

@@ -25,14 +25,18 @@ export default function Dashboard() {
           getTestimonials(),
         ]);
 
-        const sliders = Array.isArray(slidersRes?.data?.data) ? slidersRes.data.data : [];
-        const products = Array.isArray(productsRes?.data?.data) ? productsRes.data.data : [];
-        const testimonials = Array.isArray(testimonialsRes?.data?.data) ? testimonialsRes.data.data : [];
+        const extractCount = (response) => {
+          const payload = response?.data?.data;
+          if (Array.isArray(payload)) return payload.length;
+          if (Array.isArray(payload?.data)) return payload.data.length;
+          if (Number.isFinite(Number(payload?.meta?.total))) return Number(payload.meta.total);
+          return 0;
+        };
 
         setStats({
-          sliders: sliders.length,
-          products: products.length,
-          testimonials: testimonials.length,
+          sliders: extractCount(slidersRes),
+          products: extractCount(productsRes),
+          testimonials: extractCount(testimonialsRes),
         });
       } catch (err) {
         console.error(err);

@@ -1,10 +1,48 @@
-const API_BASE_URL = import.meta.env.VITE_PUBLIC_API_URL || 'http://localhost/honey-ghee/backend/api'
-const BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost/honey-ghee/backend'
+import { getBackendBaseUrl, getPublicApiBaseUrl } from "../utils/runtimeApi.js";
+
+const API_BASE_URL = getPublicApiBaseUrl();
+const BACKEND_BASE_URL = getBackendBaseUrl();
+
+function getOrigin() {
+  if (typeof window === "undefined") return "";
+  return window.location.origin || "";
+}
+
+function isAbsoluteHttpUrl(value) {
+  return /^https?:\/\//i.test(String(value || ""));
+}
+
+function isSameOriginUrl(value) {
+  const origin = getOrigin();
+  if (!origin || !isAbsoluteHttpUrl(value)) return false;
+  try {
+    return new URL(value).origin === origin;
+  } catch {
+    return false;
+  }
+}
+
+function unique(values) {
+  return Array.from(new Set(values.filter(Boolean)));
+}
+
+function getApiCandidates() {
+  const envApi = String(import.meta.env.VITE_PUBLIC_API_URL || "").replace(/\/+$/, "");
+  const origin = getOrigin();
+  const safeEnvApi = !envApi || !isAbsoluteHttpUrl(envApi) || isSameOriginUrl(envApi) ? envApi : "";
+  return unique([
+    origin ? `${origin}/backend/api` : "",
+    origin ? `${origin}/api` : "",
+    safeEnvApi,
+    API_BASE_URL,
+  ]);
+}
 
 function absoluteUrl(path) {
   if (!path) return ''
   if (/^https?:\/\//i.test(path)) return path
-  return `${BACKEND_BASE_URL.replace(/\/$/, '')}/${String(path).replace(/^\//, '')}`
+  const normalizedPath = String(path).replace(/^\//, '').replace(/^backend\//i, '')
+  return `${BACKEND_BASE_URL.replace(/\/$/, '')}/${normalizedPath}`
 }
 
 function decodeHtmlEntities(value) {
@@ -20,14 +58,25 @@ function decodeHtmlEntities(value) {
 }
 
 async function request(path) {
-  const response = await fetch(`${API_BASE_URL}${path}`)
+  const candidates = getApiCandidates()
+  let lastError = null
 
-  if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`)
+  for (const base of candidates) {
+    try {
+      const response = await fetch(`${base}${path}`)
+      if (!response.ok) {
+        lastError = new Error(`Request failed: ${response.status} (${base}${path})`)
+        continue
+      }
+
+      const payload = await response.json()
+      return payload?.data
+    } catch (err) {
+      lastError = err
+    }
   }
 
-  const payload = await response.json()
-  return payload?.data
+  throw lastError || new Error("Request failed")
 }
 
 export function normalizeProduct(product) {
@@ -78,9 +127,8 @@ export async function fetchPublicHeroSlides() {
   return data.map((slide) => ({
     id: String(slide.id),
     image: absoluteUrl(slide.image_path),
-    title: String(slide.title || '')
-      .split(' ')
-      .filter(Boolean),
+    title: String(slide.title || ''),
+    subtitle: String(slide.subtitle || ''),
     buttonText: slide.button_text || 'Shop Now',
     buttonLink: slide.button_link || '/product',
   }))

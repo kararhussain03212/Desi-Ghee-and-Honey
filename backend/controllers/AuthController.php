@@ -110,7 +110,7 @@ final class AuthController extends BaseController
         ], 'Admin fetched');
     }
 
-    private function parsePermissions(mixed $value): array
+    private function parsePermissions($value): array
     {
         if (!is_string($value) || trim($value) === '') return [];
         $decoded = json_decode($value, true);

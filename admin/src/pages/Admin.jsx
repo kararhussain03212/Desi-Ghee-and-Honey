@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useAuth } from "../context/useAuth";
 import { uploadImage } from "../api/uploadApi";
+import { getBackendRoot } from "../api/runtimeApi";
 
 export default function Admin() {
   const { user, updateProfile, changePassword } = useAuth();
@@ -27,7 +28,7 @@ export default function Admin() {
     const value = profileForm.profile_photo || user?.profile_photo || "";
     if (!value) return "";
     if (value.startsWith("http")) return value;
-    const base = (import.meta.env.VITE_API_URL || "").replace(/\/api\/?$/, "");
+    const base = getBackendRoot();
     if (value.startsWith("/")) return base + value;
     return base + "/uploads/" + value;
   }, [profileForm.profile_photo, user?.profile_photo]);
@@ -185,7 +186,7 @@ export default function Admin() {
             <div className="mt-3 space-y-2 text-lg text-white/85">
               <p>Role: <span className="font-semibold capitalize text-white">{user?.role || "admin"}</span></p>
               <p>Designation: <span className="font-semibold text-white">{profileForm.designation || "-"}</span></p>
-              <p>Status: <span className="font-semibold capitalize text-white">{user?.status || "active"}</span></p>
+              <p>Status: <span className={String(user?.status || "").toLowerCase() === "inactive" ? "font-semibold capitalize text-red-400" : "font-semibold capitalize text-emerald-300"}>{user?.status || "active"}</span></p>
             </div>
           </section>
         </div>

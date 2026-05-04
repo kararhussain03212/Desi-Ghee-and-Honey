@@ -10,6 +10,7 @@ import ProductSettingsSection from "./sections/ProductSettingsSection";
 import ContactSettingsSection from "./sections/ContactSettingsSection";
 import AboutSettingsSection from "./sections/AboutSettingsSection";
 import FieldRows from "./sections/FieldRows";
+import { getBackendRoot } from "../../api/runtimeApi";
 
 const textFieldConfig = [
   { key: "site_brand_text", section: "navbar" },
@@ -193,10 +194,7 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
   const [success, setSuccess] = useState("");
   const [sectionStatus, setSectionStatus] = useState(defaultSectionStatus);
 
-  const apiRoot = useMemo(() => {
-    const base = import.meta.env.VITE_API_URL || "";
-    return base.replace(/\/api\/?$/, "");
-  }, []);
+  const apiRoot = useMemo(() => getBackendRoot(), []);
 
   const fieldSectionMap = useMemo(
     () => textFieldConfig.reduce((acc, field) => ({ ...acc, [field.key]: field.section }), {}),
@@ -276,7 +274,7 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
 
           if (key.startsWith("section_status_")) {
             const statusKey = key.replace("section_status_", "");
-            nextSectionStatus[statusKey] = rawValue === "inactive" ? "inactive" : "active";
+            nextSectionStatus[statusKey] = ["inactive", "unactive"].includes(String(rawValue).toLowerCase()) ? "inactive" : "active";
             return;
           }
 

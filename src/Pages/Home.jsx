@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { FiArrowRight, FiChevronLeft, FiChevronRight, FiCheck } from 'react-icons/fi'
+import { FiArrowRight, FiCheck } from 'react-icons/fi'
 import { FaRegStar, FaStar, FaStarHalfAlt } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Autoplay, Pagination } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/navigation'
+import 'swiper/css/pagination'
 import cowicon from '../assets/icons/cowicon.png'
 import goaticon from '../assets/icons/goaticon.png'
 import buffaloicon from '../assets/icons/buffaloicon.png'
@@ -10,6 +15,7 @@ import newsletterRight from '../assets/icons/honey1.png'
 import { formatRs } from '../utils/money.js'
 import { useContent } from '../context/content.js'
 import { getSettingJson, getSettingText, isSectionActive } from '../utils/siteSettings.js'
+import { getBackendBaseUrl } from '../utils/runtimeApi.js'
 import '../App.css'
 
 function useSlidesPerView() {
@@ -77,11 +83,12 @@ function Home() {
   const homeOfferActive = isSectionActive(settings, 'home_offer', true)
   const homeTestimonialsActive = isSectionActive(settings, 'home_testimonials', true)
   const homeNewsletterActive = isSectionActive(settings, 'home_newsletter', true)
-  const backendBase = (import.meta.env.VITE_BACKEND_URL || 'http://localhost/honey-ghee/backend').replace(/\/$/, '')
+  const backendBase = getBackendBaseUrl()
   const toAssetUrl = (path, fallback) => {
     if (!path) return fallback
     if (/^https?:\/\//i.test(path)) return path
-    return `${backendBase}/${String(path).replace(/^\//, '')}`
+    const normalizedPath = String(path).replace(/^\//, '').replace(/^backend\//i, '')
+    return `${backendBase}/${normalizedPath}`
   }
 
   const aboutKicker = getSettingText(settings, "home_about_kicker", "");
@@ -212,8 +219,10 @@ function Home() {
   const slides = useMemo(
     () =>
       (Array.isArray(apiHeroSlides) ? apiHeroSlides : []).map((slide) => ({
-        image: slide.image,
-        title: String(slide.title || "").trim(),
+        image: toAssetUrl(slide.image, ''),
+        title: Array.isArray(slide.title)
+          ? slide.title.map((part) => String(part || '').trim()).filter(Boolean).join(' ')
+          : String(slide.title || "").trim(),
         subtitle: String(slide.subtitle || "").trim(),
         buttonText: slide.buttonText || "",
         buttonLink: slide.buttonLink || "",
@@ -221,53 +230,7 @@ function Home() {
     [apiHeroSlides],
   );
 
-  const heroSlides = useMemo(() => {
-    if (!slides.length) return []
-    return [slides[slides.length - 1], ...slides, slides[0]]
-  }, [slides])
-
-  const [index, setIndex] = useState(1)
-  const [heroNoTransition, setHeroNoTransition] = useState(false)
   const prefersReducedMotion = usePrefersReducedMotion()
-
-  useEffect(() => {
-    if (slides.length <= 1) return
-    const id = setInterval(() => {
-      setIndex((v) => v + 1)
-    }, 7000)
-    return () => clearInterval(id)
-  }, [slides.length])
-
-  useEffect(() => {
-    if (!prefersReducedMotion) return
-    if (index === heroSlides.length - 1) setIndex(1)
-    if (index === 0) setIndex(slides.length)
-  }, [heroSlides.length, index, prefersReducedMotion, slides.length])
-
-  const prev = () => {
-    if (slides.length <= 1) return
-    setIndex((v) => {
-      const newIndex = v - 1
-      if (newIndex < 1) return slides.length
-      return newIndex
-    })
-  }
-
-  const next = () => {
-    if (slides.length <= 1) return
-    setIndex((v) => {
-      const newIndex = v + 1
-      if (newIndex >= heroSlides.length) return 1
-      return newIndex
-    })
-  }
-
-  const realIndex = slides.length ? ((index - 1 + slides.length) % slides.length) : 0
-  const active = slides[realIndex]
-  const heroTitleLines = String(active?.title || '')
-    .split(/\r?\n|[|]/)
-    .map((line) => line.trim())
-    .filter(Boolean)
 
   const getHeroLineClass = (idx, total) => {
     if (total === 1) return 'hero__honey'
@@ -321,81 +284,72 @@ function Home() {
   return (
     <main className="home" id="home">
       <section className="hero" aria-label="Hero slider">
-        <div className="hero__slides" aria-hidden="true">
-          <div
-            className={[
-              'hero__track',
-              prefersReducedMotion ? 'hero__track--noMotion' : '',
-              heroNoTransition ? 'hero__track--noTransition' : '',
-            ].filter(Boolean).join(' ')}
-            style={{ transform: `translateX(-${index * 100}%)` }}
-            onTransitionEnd={() => {
-              if (index === heroSlides.length - 1) {
-                setHeroNoTransition(true)
-                setIndex(1)
-                nextFrame(() => setHeroNoTransition(false))
-              }
+        <Swiper
+          key={`hero-swiper-${slides.length}`}
+          modules={[Pagination, Autoplay]}
+          loop={slides.length > 1}
+          observer={true}
+          observeParents={true}
+          watchOverflow={false}
+          pagination={{
+            clickable: true,
+            dynamicBullets: true,
+          }}
+          autoplay={
+            slides.length > 1
+              ? {
+                  delay: 4000,
+                  disableOnInteraction: false,
+                  pauseOnMouseEnter: false,
+                }
+              : false
+          }
+          speed={900}
+          className="heroSwiper"
+          onSwiper={(swiper) => {
+            if (slides.length > 1 && swiper?.autoplay) {
+              swiper.autoplay.start()
+            }
+          }}
+        >
+          {slides.map((slide, i) => {
+            const heroTitleLines = String(slide?.title || '')
+              .split(/\r?\n|[|]/)
+              .map((line) => line.trim())
+              .filter(Boolean)
 
-              if (index === 0) {
-                setHeroNoTransition(true)
-                setIndex(slides.length)
-                nextFrame(() => setHeroNoTransition(false))
-              }
-            }}
-          >
-            {heroSlides.map((slide, i) => (
-              <div key={`${slide.image}-${i}`} className="hero__slide" style={{ backgroundImage: `url(${slide.image})` }} />
-            ))}
-          </div>
-        </div>
+            return (
+              <SwiperSlide key={`${slide.image}-${i}`}>
+                <div className="hero__slide" style={{ backgroundImage: `url(${slide.image})`, minHeight: 'clamp(520px, 78vh, 820px)' }}>
+                  <div className="hero__overlay">
+                    <div className="hero__content">
+                      <h1
+                        className={prefersReducedMotion ? 'hero__title' : 'hero__title hero__title--animate'}
+                        data-aos="fade-right"
+                        data-aos-duration="1000"
+                      >
+                        {heroTitleLines.map((line, idx) => (
+                          <span key={`${line}-${idx}`} className={getHeroLineClass(idx, heroTitleLines.length)}>
+                            {line}
+                          </span>
+                        ))}
+                      </h1>
+                      {slide?.subtitle ? (
+                        <p className="mt-3 max-w-xl text-base text-white/85" data-aos="fade-right" data-aos-duration="1000">
+                          {slide.subtitle}
+                        </p>
+                      ) : null}
 
-        <div className="hero__overlay">
-          <div className="hero__content">
-            <h1
-              key={realIndex}
-              className={prefersReducedMotion ? 'hero__title' : 'hero__title hero__title--animate'}
-              data-aos="fade-right"
-              data-aos-duration="1000"
-            >
-              {heroTitleLines.map((line, idx) => (
-                <span key={`${line}-${idx}`} className={getHeroLineClass(idx, heroTitleLines.length)}>
-                  {line}
-                </span>
-              ))}
-            </h1>
-            {active?.subtitle ? (
-              <p className="mt-3 max-w-xl text-base text-white/85" data-aos="fade-right" data-aos-duration="1000">
-                {active.subtitle}
-              </p>
-            ) : null}
-
-            <Link className="hero__btn" to={active?.buttonLink || '/product'} data-aos="fade-down" data-aos-duration="1000">
-              {active?.buttonText || 'SHOP NOW'}
-            </Link>
-          </div>
-
-          <button type="button" className="hero__arrow hero__arrow--left" onClick={prev}>
-            <FiChevronLeft aria-hidden="true" />
-            <span className="sr-only">Previous slide</span>
-          </button>
-          <button type="button" className="hero__arrow hero__arrow--right" onClick={next}>
-            <FiChevronRight aria-hidden="true" />
-            <span className="sr-only">Next slide</span>
-          </button>
-
-          <div className="hero__dots" role="tablist" aria-label="Slides">
-            {slides.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                className={i === realIndex ? 'hero__dot hero__dot--active' : 'hero__dot'}
-                onClick={() => setIndex(i + 1)}
-                aria-label={`Go to slide ${i + 1}`}
-                aria-current={i === realIndex ? 'true' : undefined}
-              />
-            ))}
-          </div>
-        </div>
+                      <Link className="hero__btn" to={slide?.buttonLink || '/product'} data-aos="fade-down" data-aos-duration="1000">
+                        {slide?.buttonText || 'SHOP NOW'}
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </SwiperSlide>
+            )
+          })}
+        </Swiper>
       </section>
 
       {homeAboutActive ? (

@@ -30,14 +30,21 @@ final class Setting extends BaseModel
         );
 
         $position = 1;
-        foreach ($items as $key => $value) {
-            $stmt->execute([
-                ':setting_key' => (string) $key,
-                ':setting_value' => is_scalar($value) ? (string) $value : json_encode($value, JSON_UNESCAPED_SLASHES),
-                ':setting_type' => is_scalar($value) ? 'text' : 'json',
-                ':order_position' => $position++,
-                ':status' => 'active',
-            ]);
+        $this->pdo->beginTransaction();
+        try {
+            foreach ($items as $key => $value) {
+                $stmt->execute([
+                    ':setting_key' => (string) $key,
+                    ':setting_value' => is_scalar($value) ? (string) $value : json_encode($value, JSON_UNESCAPED_SLASHES),
+                    ':setting_type' => is_scalar($value) ? 'text' : 'json',
+                    ':order_position' => $position++,
+                    ':status' => 'active',
+                ]);
+            }
+            $this->pdo->commit();
+        } catch (\Throwable $e) {
+            $this->pdo->rollBack();
+            throw $e;
         }
     }
 }

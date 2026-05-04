@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { deleteProduct, getProducts, updateProduct } from "../../api/productApi";
 import { useAuth } from "../../context/useAuth";
-import { normalizeUserRole } from "../../modules/users/constants";
+import { hasPermission } from "../../modules/users/constants";
+import { getBackendRoot } from "../../api/runtimeApi";
 
 const PRODUCT_FALLBACK_IMAGE = `data:image/svg+xml;utf8,${encodeURIComponent(
   "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 600'><rect width='900' height='600' fill='#171717'/><text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle' fill='#ffffff' font-family='Arial,sans-serif' font-size='48'>Product</text></svg>",
@@ -16,12 +17,10 @@ export default function ProductList() {
   const [error, setError] = useState("");
   const [toast, setToast] = useState({ show: false, text: "" });
 
-  const isAdmin = normalizeUserRole(user?.role) === "admin";
-  const permissions = Array.isArray(user?.permissions) ? user.permissions : [];
-  const canAdd = isAdmin || permissions.includes("add_data");
-  const canEdit = isAdmin || permissions.includes("edit_data");
-  const canDelete = isAdmin || permissions.includes("delete_data");
-  const canPublish = isAdmin || permissions.includes("publish_data");
+  const canAdd = hasPermission(user, "add_data");
+  const canEdit = hasPermission(user, "edit_data");
+  const canDelete = hasPermission(user, "delete_data");
+  const canPublish = hasPermission(user, "publish_data");
 
   const showNoPerm = (action) => setToast({ show: true, text: `You do not have permission to ${action}.` });
 
@@ -31,10 +30,7 @@ export default function ProductList() {
     return () => clearTimeout(t);
   }, [toast]);
 
-  const apiRoot = useMemo(() => {
-    const base = import.meta.env.VITE_API_URL || "";
-    return base.replace(/\/api\/?$/, "");
-  }, []);
+  const apiRoot = useMemo(() => getBackendRoot(), []);
 
   const resolveImage = (value) => {
     if (!value) {
@@ -188,7 +184,7 @@ export default function ProductList() {
                         className={
                           item.status === "active"
                             ? "rounded-lg bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700"
-                            : "rounded-lg bg-gray-600 px-4 py-2 text-sm text-white hover:bg-gray-700"
+                            : "rounded-lg bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
                         }
                       >
                         {item.status === "active" ? "Active" : "Inactive"}

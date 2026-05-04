@@ -5,15 +5,17 @@ import { FaFacebookF, FaInstagram, FaTiktok } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 import { useContent } from '../context/content.js'
 import { getSettingJson, getSettingText, isSectionActive } from '../utils/siteSettings.js'
+import { getBackendBaseUrl } from '../utils/runtimeApi.js'
 
 function Footer() {
   const [showTop, setShowTop] = useState(false)
   const { settings } = useContent()
-  const backendBase = (import.meta.env.VITE_BACKEND_URL || 'http://localhost/honey-ghee/backend').replace(/\/$/, '')
+  const backendBase = getBackendBaseUrl()
   const toAssetUrl = (path) => {
     if (!path) return ''
     if (/^https?:\/\//i.test(path)) return path
-    return `${backendBase}/${String(path).replace(/^\//, '')}`
+    const normalizedPath = String(path).replace(/^\//, '').replace(/^backend\//i, '')
+    return `${backendBase}/${normalizedPath}`
   }
 
   const brandText = getSettingText(settings, "site_brand_text", "");
@@ -57,16 +59,25 @@ function Footer() {
   const footerCopyright = getSettingText(settings, "footer_copyright", "");
   const footerCreditText = getSettingText(settings, "footer_credit_text", "");
   const footerCreditUrl = getSettingText(settings, "footer_credit_url", "");
-  const footerLinkHome = getSettingText(settings, "footer_link_home", "");
-  const footerLinkAbout = getSettingText(settings, "footer_link_about", "");
-  const footerLinkProduct = getSettingText(settings, "footer_link_product", "");
-  const footerLinkContact = getSettingText(settings, "footer_link_contact", "");
-  const footerLinks = [
-    { label: footerLinkHome, path: "/" },
-    { label: footerLinkAbout, path: "/about" },
-    { label: footerLinkProduct, path: "/product" },
-    { label: footerLinkContact, path: "/contact" },
-  ];
+  const savedFooterLinks = getSettingJson(settings, "footer_links", []);
+  const footerLinkHome = getSettingText(settings, "footer_link_home", "Home");
+  const footerLinkAbout = getSettingText(settings, "footer_link_about", "About");
+  const footerLinkProduct = getSettingText(settings, "footer_link_product", "Product");
+  const footerLinkContact = getSettingText(settings, "footer_link_contact", "Contact");
+  const footerLinks = Array.isArray(savedFooterLinks) && savedFooterLinks.length
+    ? savedFooterLinks
+        .map((item) => ({
+          label: String(item?.label || "").trim(),
+          path: String(item?.path || "").trim(),
+        }))
+        .filter((item) => item.label && item.path)
+    : [
+        { label: footerLinkHome, path: "/" },
+        { label: footerLinkAbout, path: "/about" },
+        { label: footerLinkProduct, path: "/product" },
+        { label: footerLinkContact, path: "/contact" },
+      ];
+
   const filteredFooterLinks = footerLinks.filter((item) => {
     if (item.path === '/about') return isSectionActive(settings, 'about', true)
     if (item.path === '/product') return isSectionActive(settings, 'product', true)

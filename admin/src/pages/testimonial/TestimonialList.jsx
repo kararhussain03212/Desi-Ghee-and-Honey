@@ -6,7 +6,8 @@ import {
   updateTestimonial,
 } from "../../api/testimonialApi";
 import { useAuth } from "../../context/useAuth";
-import { normalizeUserRole } from "../../modules/users/constants";
+import { hasPermission } from "../../modules/users/constants";
+import { getBackendRoot } from "../../api/runtimeApi";
 
 const FALLBACK_AVATAR = `data:image/svg+xml;utf8,${encodeURIComponent(
   "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 300'><rect width='300' height='300' fill='#171717'/><text x='50%' y='50%' text-anchor='middle' dominant-baseline='middle' fill='#ffffff' font-family='Arial,sans-serif' font-size='30'>Avatar</text></svg>",
@@ -20,12 +21,10 @@ export default function TestimonialList() {
   const [error, setError] = useState("");
   const [toast, setToast] = useState({ show: false, text: "" });
 
-  const isAdmin = normalizeUserRole(user?.role) === "admin";
-  const permissions = Array.isArray(user?.permissions) ? user.permissions : [];
-  const canAdd = isAdmin || permissions.includes("add_data");
-  const canEdit = isAdmin || permissions.includes("edit_data");
-  const canDelete = isAdmin || permissions.includes("delete_data");
-  const canPublish = isAdmin || permissions.includes("publish_data");
+  const canAdd = hasPermission(user, "add_data");
+  const canEdit = hasPermission(user, "edit_data");
+  const canDelete = hasPermission(user, "delete_data");
+  const canPublish = hasPermission(user, "publish_data");
 
   const showNoPerm = (action) => setToast({ show: true, text: `You do not have permission to ${action}.` });
 
@@ -35,10 +34,7 @@ export default function TestimonialList() {
     return () => clearTimeout(t);
   }, [toast]);
 
-  const apiRoot = useMemo(() => {
-    const base = import.meta.env.VITE_API_URL || "";
-    return base.replace(/\/api\/?$/, "");
-  }, []);
+  const apiRoot = useMemo(() => getBackendRoot(), []);
 
   const resolveImage = (value) => {
     if (!value) return FALLBACK_AVATAR;
@@ -51,11 +47,18 @@ export default function TestimonialList() {
   useEffect(() => {
     const loadTestimonials = async () => {
       try {
-        const res = await getTestimonials();
-        setTestimonials(Array.isArray(res?.data?.data) ? res.data.data : []);
+        const res = await getTestimonials(1, 30);
+        const payload = res?.data?.data;
+        const rows = Array.isArray(payload?.data)
+          ? payload.data
+          : Array.isArray(payload)
+            ? payload
+            : [];
+        setTestimonials(rows);
       } catch (err) {
         console.error(err);
-        setError("Failed to load testimonials.");
+        const timedOut = String(err?.code || "").toUpperCase() === "ECONNABORTED";
+        setError(timedOut ? "Request timed out. Please try again." : "Failed to load testimonials.");
       } finally {
         setLoading(false);
       }
@@ -191,7 +194,7 @@ export default function TestimonialList() {
                       className={
                         item.status === "active"
                           ? "rounded-lg bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-700"
-                          : "rounded-lg bg-gray-600 px-4 py-2 text-sm text-white hover:bg-gray-700"
+                          : "rounded-lg bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
                       }
                     >
                       {item.status === "active" ? "Active" : "Inactive"}

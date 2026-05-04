@@ -21,7 +21,7 @@ export function ContentProvider({ children }) {
       setLoading(true)
 
       try {
-        const [productsData, heroData, testimonialsData, settingsData] = await Promise.all([
+        const [productsRes, heroRes, testimonialsRes, settingsRes] = await Promise.allSettled([
           fetchPublicProducts(),
           fetchPublicHeroSlides(),
           fetchPublicTestimonials(),
@@ -30,20 +30,12 @@ export function ContentProvider({ children }) {
 
         if (!isMounted) return
 
-        if (Array.isArray(productsData)) setProducts(productsData)
-
-        if (Array.isArray(heroData)) setHeroSlides(heroData)
-
-        if (Array.isArray(testimonialsData)) setTestimonials(testimonialsData)
-
-        if (settingsData && typeof settingsData === 'object') {
-          setSettings(settingsData)
-        }
-      } catch {
-        setProducts([])
-        setHeroSlides([])
-        setTestimonials([])
-        setSettings({})
+        setProducts(productsRes.status === 'fulfilled' && Array.isArray(productsRes.value) ? productsRes.value : [])
+        setHeroSlides(heroRes.status === 'fulfilled' && Array.isArray(heroRes.value) ? heroRes.value : [])
+        setTestimonials(
+          testimonialsRes.status === 'fulfilled' && Array.isArray(testimonialsRes.value) ? testimonialsRes.value : []
+        )
+        setSettings(settingsRes.status === 'fulfilled' && settingsRes.value && typeof settingsRes.value === 'object' ? settingsRes.value : {})
       } finally {
         if (isMounted) setLoading(false)
       }

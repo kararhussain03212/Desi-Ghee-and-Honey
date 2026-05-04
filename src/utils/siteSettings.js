@@ -35,5 +35,6 @@ export function toWhatsAppDigits(input, fallback = '923338399480') {
 export function isSectionActive(settings, sectionKey, fallback = true) {
   const key = `section_status_${sectionKey}`
   const status = getSettingText(settings, key, fallback ? 'active' : 'inactive')
-  return String(status).trim().toLowerCase() !== 'inactive'
+  const normalized = String(status).trim().toLowerCase()
+  return normalized !== 'inactive' && normalized !== 'unactive'
 }

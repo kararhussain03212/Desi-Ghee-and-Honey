@@ -11,25 +11,12 @@
       <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo+Narrow:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet">
-    <script>
-      ;(function () { var params = new URLSearchParams(location.search)
-         var redirect = params.get('redirect')
-        if (!redirect) return
-        params.delete('redirect')
-        var cleaned = params.toString()
-        var base = location.pathname
-        var next = redirect + (cleaned ? (redirect.indexOf('?') === -1 ? '?' : '&') + cleaned : '')
-        history.replaceState(null, '', base + next)
-      })()
-    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-     <script>
-       AOS.init();
-     </script>
+    <script src="/security-bootstrap.js"></script>
   </body>
 </html>

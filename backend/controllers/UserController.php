@@ -307,7 +307,7 @@ final class UserController extends BaseController
         ];
     }
 
-    private function parsePermissions(mixed $value): array
+    private function parsePermissions($value): array
     {
         if (!is_string($value) || trim($value) === '') return [];
         $decoded = json_decode($value, true);

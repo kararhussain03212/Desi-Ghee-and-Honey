@@ -5,6 +5,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { useOrder } from '../context/order.js'
 import { useContent } from '../context/content.js'
 import { getSettingJson, getSettingText, isSectionActive } from '../utils/siteSettings.js'
+import { getBackendBaseUrl } from '../utils/runtimeApi.js'
 import "../App.css"
 
 
@@ -14,25 +15,34 @@ function NavBar() {
   const location = useLocation()
   const { orderCount } = useOrder()
   const { settings } = useContent()
-  const backendBase = (import.meta.env.VITE_BACKEND_URL || 'http://localhost/honey-ghee/backend').replace(/\/$/, '')
+  const backendBase = getBackendBaseUrl()
   const toAssetUrl = (path) => {
     if (!path) return ''
     if (/^https?:\/\//i.test(path)) return path
-    return `${backendBase}/${String(path).replace(/^\//, '')}`
+    const normalizedPath = String(path).replace(/^\//, '').replace(/^backend\//i, '')
+    return `${backendBase}/${normalizedPath}`
   }
 
   const brandText = getSettingText(settings, "site_brand_text", "");
   const navLogo = getSettingText(settings, 'nav_logo', '')
-  const navLinkHome = getSettingText(settings, "nav_link_home", "");
-  const navLinkAbout = getSettingText(settings, "nav_link_about", "");
-  const navLinkProduct = getSettingText(settings, "nav_link_product", "");
-  const navLinkContact = getSettingText(settings, "nav_link_contact", "");
-  const navLinks = [
-    { label: navLinkHome, path: "/" },
-    { label: navLinkAbout, path: "/about" },
-    { label: navLinkProduct, path: "/product" },
-    { label: navLinkContact, path: "/contact" },
-  ];
+  const savedNavLinks = getSettingJson(settings, "nav_links", []);
+  const navLinkHome = getSettingText(settings, "nav_link_home", "Home");
+  const navLinkAbout = getSettingText(settings, "nav_link_about", "About");
+  const navLinkProduct = getSettingText(settings, "nav_link_product", "Product");
+  const navLinkContact = getSettingText(settings, "nav_link_contact", "Contact");
+  const navLinks = Array.isArray(savedNavLinks) && savedNavLinks.length
+    ? savedNavLinks
+        .map((item) => ({
+          label: String(item?.label || "").trim(),
+          path: String(item?.path || "").trim(),
+        }))
+        .filter((item) => item.label && item.path)
+    : [
+        { label: navLinkHome, path: "/" },
+        { label: navLinkAbout, path: "/about" },
+        { label: navLinkProduct, path: "/product" },
+        { label: navLinkContact, path: "/contact" },
+      ];
   const filteredNavLinks = navLinks.filter((item) => {
     if (item.path === '/about') return isSectionActive(settings, 'about', true)
     if (item.path === '/product') return isSectionActive(settings, 'product', true)

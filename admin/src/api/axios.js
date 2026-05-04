@@ -1,7 +1,7 @@
 import axios from 'axios'
+import { getApiBase } from './runtimeApi'
 
-const envApiBase = (import.meta.env.VITE_API_URL || "").trim()
-const API_BASE_URL = envApiBase || (import.meta.env.DEV ? "/api" : "/honey-ghee/backend/api")
+const API_BASE_URL = getApiBase()
 const TOKEN_KEY = 'token'
 const AUTH_USER_KEY = 'authUser'
 const CSRF_TOKEN_KEY = 'csrfToken'
@@ -41,6 +41,7 @@ const emitAuthLogout = () => {
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 15000,
 })
 
 api.interceptors.request.use((config) => {

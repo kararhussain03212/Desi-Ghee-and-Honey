@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { createUser, deleteUser, getUserById, getUsers, updateUser } from "../../api/userApi";
 import { useAuth } from "../../context/useAuth";
-import { normalizeUserRole } from "../../modules/users/constants";
+import { isUserActive, normalizeUserRole } from "../../modules/users/constants";
 import PaginationControls from "../../modules/users/components/PaginationControls";
 import DeleteUserDialog from "../../modules/users/components/DeleteUserDialog";
 import UserDetailsDrawer from "../../modules/users/components/UserDetailsDrawer";
@@ -23,10 +23,11 @@ const extractErrorMessage = (error, fallback) =>
 export default function UserManagement() {
   const { user } = useAuth();
   const isAdmin = useMemo(() => normalizeUserRole(user?.role) === "admin", [user?.role]);
-  const canViewUsers = isAdmin;
-  const canCreateUsers = isAdmin;
-  const canEditUsers = isAdmin;
-  const canDeleteUsers = isAdmin;
+  const activeUser = useMemo(() => isUserActive(user?.status), [user?.status]);
+  const canViewUsers = isAdmin && activeUser;
+  const canCreateUsers = isAdmin && activeUser;
+  const canEditUsers = isAdmin && activeUser;
+  const canDeleteUsers = isAdmin && activeUser;
 
   const [query, setQuery] = useState(DEFAULT_QUERY);
   const [searchInput, setSearchInput] = useState("");

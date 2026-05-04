@@ -44,6 +44,7 @@ final class SettingController extends BaseController
         ActivityLogger::log($this->currentAdminId(), 'update', 'settings', null);
         Cache::clearAll();
 
-        Response::success($model->asMap(false), 'Settings updated');
+        // Keep response small to reduce save latency on shared hosting.
+        Response::success(null, 'Settings updated');
     }
 }

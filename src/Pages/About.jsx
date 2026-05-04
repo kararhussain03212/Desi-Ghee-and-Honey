@@ -9,6 +9,7 @@ import processIconA from '../assets/icons/icon.png'
 import processIconB from '../assets/images/icon2.png'
 import { useContent } from '../context/content.js'
 import { getSettingJson, getSettingText } from '../utils/siteSettings.js'
+import { getBackendBaseUrl } from '../utils/runtimeApi.js'
 import '../App.css'
 
 const CATEGORY_ICON_MAP = {
@@ -21,11 +22,12 @@ const PROCESS_ICON_FALLBACKS = [processIconA, processIconB, processGheeIcon, pro
 
 function About() {
   const { settings } = useContent()
-  const backendBase = (import.meta.env.VITE_BACKEND_URL || 'http://localhost/honey-ghee/backend').replace(/\/$/, '')
+  const backendBase = getBackendBaseUrl()
   const toAssetUrl = (path, fallback) => {
     if (!path) return fallback
     if (/^https?:\/\//i.test(path)) return path
-    return `${backendBase}/${String(path).replace(/^\//, '')}`
+    const normalizedPath = String(path).replace(/^\//, '').replace(/^backend\//i, '')
+    return `${backendBase}/${normalizedPath}`
   }
   const safeSrc = (value) => {
     const src = typeof value === 'string' ? value.trim() : ''

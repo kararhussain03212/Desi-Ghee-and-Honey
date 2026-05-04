@@ -22,31 +22,7 @@ abstract class BaseModel
 
     public function all(array $query = [], bool $onlyActive = false): array
     {
-        $where = [];
-        $params = [];
-
-        if ($onlyActive && $this->hasColumn('status')) {
-            $where[] = 'status = :status';
-            $params[':status'] = 'active';
-        }
-
-        if ($this->hasColumn('status') && isset($query['status']) && in_array($query['status'], ['active', 'inactive'], true)) {
-            $where[] = 'status = :f_status';
-            $params[':f_status'] = $query['status'];
-        }
-
-        if (isset($query['search']) && trim((string) $query['search']) !== '') {
-            $searchable = $this->searchableColumns();
-            if ($searchable !== []) {
-                $chunks = [];
-                foreach ($searchable as $index => $column) {
-                    $key = ':search_' . $index;
-                    $chunks[] = sprintf('%s LIKE %s', $column, $key);
-                    $params[$key] = '%' . trim((string) $query['search']) . '%';
-                }
-                $where[] = '(' . implode(' OR ', $chunks) . ')';
-            }
-        }
+        [$where, $params] = $this->buildFilters($query, $onlyActive);
 
         $sql = 'SELECT * FROM ' . $this->table;
         if ($where !== []) {
@@ -66,10 +42,32 @@ abstract class BaseModel
         $page = max(1, (int) ($query['page'] ?? 1));
         $perPage = max(1, min(100, (int) ($query['per_page'] ?? 10)));
         $offset = ($page - 1) * $perPage;
+        [$where, $params] = $this->buildFilters($query, $onlyActive);
 
-        $allRows = $this->all($query, $onlyActive);
-        $total = count($allRows);
-        $data = array_slice($allRows, $offset, $perPage);
+        $countSql = 'SELECT COUNT(*) AS aggregate FROM ' . $this->table;
+        if ($where !== []) {
+            $countSql .= ' WHERE ' . implode(' AND ', $where);
+        }
+
+        $countStmt = $this->pdo->prepare($countSql);
+        $countStmt->execute($params);
+        $countRow = $countStmt->fetch();
+        $total = (int) ($countRow['aggregate'] ?? 0);
+
+        $dataSql = 'SELECT * FROM ' . $this->table;
+        if ($where !== []) {
+            $dataSql .= ' WHERE ' . implode(' AND ', $where);
+        }
+        $dataSql .= ' ORDER BY ' . $this->defaultOrderBy() . ' LIMIT :limit OFFSET :offset';
+
+        $dataStmt = $this->pdo->prepare($dataSql);
+        foreach ($params as $key => $value) {
+            $dataStmt->bindValue($key, $value);
+        }
+        $dataStmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+        $dataStmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $dataStmt->execute();
+        $data = $dataStmt->fetchAll() ?: [];
 
         return [
             'data' => $data,
@@ -231,5 +229,36 @@ abstract class BaseModel
         }
 
         return $payload;
+    }
+
+    private function buildFilters(array $query, bool $onlyActive): array
+    {
+        $where = [];
+        $params = [];
+
+        if ($onlyActive && $this->hasColumn('status')) {
+            $where[] = 'status = :status';
+            $params[':status'] = 'active';
+        }
+
+        if ($this->hasColumn('status') && isset($query['status']) && in_array($query['status'], ['active', 'inactive'], true)) {
+            $where[] = 'status = :f_status';
+            $params[':f_status'] = $query['status'];
+        }
+
+        if (isset($query['search']) && trim((string) $query['search']) !== '') {
+            $searchable = $this->searchableColumns();
+            if ($searchable !== []) {
+                $chunks = [];
+                foreach ($searchable as $index => $column) {
+                    $key = ':search_' . $index;
+                    $chunks[] = sprintf('%s LIKE %s', $column, $key);
+                    $params[$key] = '%' . trim((string) $query['search']) . '%';
+                }
+                $where[] = '(' . implode(' OR ', $chunks) . ')';
+            }
+        }
+
+        return [$where, $params];
     }
 }

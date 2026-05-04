@@ -8,7 +8,7 @@ final class Cache
 {
     private const DEFAULT_TTL = 300;
 
-    public static function remember(string $key, callable $resolver, int $ttl = self::DEFAULT_TTL): mixed
+    public static function remember(string $key, callable $resolver, int $ttl = self::DEFAULT_TTL)
     {
         $path = self::path($key);
         if (is_file($path)) {
@@ -25,7 +25,7 @@ final class Cache
         return $value;
     }
 
-    public static function set(string $key, mixed $value, int $ttl = self::DEFAULT_TTL): void
+    public static function set(string $key, $value, int $ttl = self::DEFAULT_TTL): void
     {
         $payload = json_encode([
             'expires_at' => time() + $ttl,

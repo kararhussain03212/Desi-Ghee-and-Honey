@@ -63,7 +63,7 @@ final class AuthMiddleware
         }
 
         foreach ($_SERVER as $key => $value) {
-            if (!is_string($key) || !str_contains($key, 'AUTHORIZATION')) {
+            if (!is_string($key) || strpos($key, 'AUTHORIZATION') === false) {
                 continue;
             }
 

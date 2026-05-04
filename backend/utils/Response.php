@@ -6,7 +6,7 @@ namespace Backend\Utils;
 
 final class Response
 {
-    public static function success(mixed $data = null, string $message = 'Operation successful', int $status = 200): never
+    public static function success($data = null, string $message = 'Operation successful', int $status = 200): void
     {
         self::send([
             'success' => true,
@@ -15,7 +15,7 @@ final class Response
         ], $status);
     }
 
-    public static function error(string $error, int $code = 400, array $extra = []): never
+    public static function error(string $error, int $code = 400, array $extra = []): void
     {
         self::send(array_merge([
             'success' => false,
@@ -24,12 +24,12 @@ final class Response
         ], $extra), $code);
     }
 
-    public static function json(array $payload, int $status = 200): never
+    public static function json(array $payload, int $status = 200): void
     {
         self::send(self::sanitizeForOutput($payload), $status);
     }
 
-    private static function sanitizeForOutput(mixed $value): mixed
+    private static function sanitizeForOutput($value)
     {
         if (is_array($value)) {
             $safe = [];
@@ -46,7 +46,7 @@ final class Response
         return $value;
     }
 
-    private static function send(array $payload, int $status): never
+    private static function send(array $payload, int $status): void
     {
         http_response_code($status);
         header('Content-Type: application/json; charset=utf-8');

@@ -7,6 +7,7 @@ import {
   updateTestimonial,
 } from "../../api/testimonialApi";
 import { uploadImage } from "../../api/uploadApi";
+import { getBackendRoot } from "../../api/runtimeApi";
 
 const getInitialForm = () => ({
   name: "",
@@ -29,10 +30,7 @@ export default function TestimonialForm() {
   const [error, setError] = useState("");
   const [form, setForm] = useState(getInitialForm);
 
-  const apiRoot = useMemo(() => {
-    const base = import.meta.env.VITE_API_URL || "";
-    return base.replace(/\/api\/?$/, "");
-  }, []);
+  const apiRoot = useMemo(() => getBackendRoot(), []);
 
   const toImageUrl = useCallback(
     (value) => {
