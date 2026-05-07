@@ -33,6 +33,8 @@ function getApiCandidates() {
   return unique([
     origin ? `${origin}/backend/api` : "",
     origin ? `${origin}/api` : "",
+    "http://localhost/honey-ghee/backend/api",
+    "http://127.0.0.1/honey-ghee/backend/api",
     safeEnvApi,
     API_BASE_URL,
   ]);
@@ -87,7 +89,7 @@ export function normalizeProduct(product) {
     variants = variantsRaw
   } else if (typeof variantsRaw === 'string' && variantsRaw.trim()) {
     try {
-      const parsed = JSON.parse(variantsRaw)
+      const parsed = JSON.parse(decodeHtmlEntities(variantsRaw))
       if (Array.isArray(parsed)) variants = parsed
     } catch {
       variants = []

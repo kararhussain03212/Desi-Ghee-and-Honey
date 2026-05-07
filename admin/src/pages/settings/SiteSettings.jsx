@@ -12,6 +12,15 @@ import AboutSettingsSection from "./sections/AboutSettingsSection";
 import FieldRows from "./sections/FieldRows";
 import { getBackendRoot } from "../../api/runtimeApi";
 
+const homeSectionTabs = [
+  { key: "about", label: "About" },
+  { key: "company", label: "Company & Products" },
+  { key: "offer", label: "Offer" },
+  { key: "testimonials", label: "Testimonials" },
+  { key: "newsletter", label: "Newsletter" },
+  { key: "video", label: "Video" },
+];
+
 const textFieldConfig = [
   { key: "site_brand_text", section: "navbar" },
   { key: "nav_cart_path", section: "navbar" },
@@ -51,6 +60,9 @@ const textFieldConfig = [
   { key: "home_newsletter_placeholder", section: "home.newsletter" },
   { key: "home_newsletter_success", section: "home.newsletter" },
   { key: "home_newsletter_error", section: "home.newsletter" },
+  { key: "home_video_title", section: "home.video" },
+  { key: "home_video_description", section: "home.video" },
+  { key: "home_video_url", section: "home.video" },
   { key: "footer_logo", section: "footer" },
   { key: "footer_description", section: "footer" },
   { key: "footer_contact_title", section: "footer" },
@@ -73,6 +85,9 @@ const textFieldConfig = [
   { key: "product_catalog_title", section: "product" },
   { key: "product_catalog_title_highlight", section: "product" },
   { key: "product_catalog_description", section: "product" },
+  { key: "product_video_title", section: "product" },
+  { key: "product_video_description", section: "product" },
+  { key: "product_video_url", section: "product" },
   { key: "contact_page_hero_image", section: "contact" },
   { key: "contact_page_title", section: "contact" },
   { key: "contact_page_breadcrumb_home", section: "contact" },
@@ -86,6 +101,11 @@ const textFieldConfig = [
   { key: "contact_email_title", section: "contact" },
   { key: "contact_email_text", section: "contact" },
   { key: "contact_form_title", section: "contact" },
+  { key: "contact_form_name_placeholder", section: "contact" },
+  { key: "contact_form_lastname_placeholder", section: "contact" },
+  { key: "contact_form_email_placeholder", section: "contact" },
+  { key: "contact_form_subject_placeholder", section: "contact" },
+  { key: "contact_form_message_placeholder", section: "contact" },
   { key: "contact_form_button_text", section: "contact" },
   { key: "contact_form_whatsapp_prefix", section: "contact" },
   { key: "contact_map_embed_url", section: "contact" },
@@ -163,6 +183,7 @@ const defaultSectionStatus = {
   home_offer: "active",
   home_testimonials: "active",
   home_newsletter: "active",
+  home_video: "active",
   footer: "active",
   product: "active",
   contact: "active",
@@ -208,6 +229,7 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
       if (activeHomeSection === "offer") return "Home - Offer Settings";
       if (activeHomeSection === "testimonials") return "Home - Testimonials Settings";
       if (activeHomeSection === "newsletter") return "Home - Newsletter Settings";
+      if (activeHomeSection === "video") return "Home - Video Settings";
     }
     if (activeMainSection === "navbar") return "Navbar Settings";
     if (activeMainSection === "footer") return "Footer Settings";
@@ -631,6 +653,24 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
             </button>
           </div>
         </div>
+        {activeMainSection === "home" ? (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {homeSectionTabs.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => setActiveHomeSection(tab.key)}
+                className={
+                  activeHomeSection === tab.key
+                    ? "rounded-lg border border-[var(--admin-accent)] bg-[var(--admin-accent)] px-3 py-1.5 text-sm font-semibold text-black"
+                    : "rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg-deep)] px-3 py-1.5 text-sm font-semibold text-[var(--admin-muted)] hover:bg-[var(--admin-card-elevated)]"
+                }
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </header>
 
       {error ? (
@@ -707,6 +747,15 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
             form={form} 
             setField={setField} 
             toLabel={toLabel} 
+          />
+        ) : null}
+
+        {activeMainSection === "home" && activeHomeSection === "video" ? (
+          <FieldRows
+            keys={getKeysFor("home.video")}
+            form={form}
+            setField={setField}
+            toLabel={toLabel}
           />
         ) : null}
 

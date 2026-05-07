@@ -27,6 +27,16 @@ export function getBackendBaseUrl() {
   if (import.meta.env.DEV) return "http://localhost/honey-ghee/backend";
 
   const origin = getOrigin();
+  if (origin) {
+    try {
+      const host = new URL(origin).hostname;
+      if (host === "localhost" || host === "127.0.0.1") {
+        return "http://localhost/honey-ghee/backend";
+      }
+    } catch {
+      // Fall through to default path-based backend URL.
+    }
+  }
   if (!origin) return "/backend";
   return `${origin}/backend`;
 }

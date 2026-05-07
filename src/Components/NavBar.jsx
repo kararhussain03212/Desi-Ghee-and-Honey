@@ -1,6 +1,6 @@
 import { GiHoneyJar } from 'react-icons/gi'
 import { FiShoppingCart } from 'react-icons/fi'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useOrder } from '../context/order.js'
 import { useContent } from '../context/content.js'
@@ -52,6 +52,17 @@ function NavBar() {
   const cartPath = getSettingText(settings, 'nav_cart_path', '/order')
   const cartIcon = getSettingText(settings, 'nav_cart_icon', '')
 
+  useEffect(() => {
+    if (!mobileMenuOpen) return undefined
+
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.body.style.overflow = originalOverflow
+    }
+  }, [mobileMenuOpen])
+
   const handleMenuClose = () => {
     setMobileMenuOpen(false)
   }
@@ -84,6 +95,9 @@ function NavBar() {
               {item.label}
             </Link>
           ))}
+        </nav>
+
+        <div className="navbar__actions">
           <Link className={`navbar__link navbar__link--shop ${isActive(cartPath) ? 'navbar__link--active' : ''}`} to={cartPath} aria-label="Cart">
             {cartIcon ? (
               <img src={toAssetUrl(cartIcon)} alt="Cart" className="navbar__shopIcon" />
@@ -92,20 +106,39 @@ function NavBar() {
             )}
             {orderCount > 0 && <span className="navbar__badge">{orderCount}</span>}
           </Link>
-        </nav>
+        </div>
 
         <button
           className="navbar__mobileToggle"
           type="button"
           aria-label="Toggle menu"
+          aria-expanded={mobileMenuOpen}
+          aria-controls="navbar-mobile-menu"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           <span className="navbar__mobileToggleIcon" aria-hidden="true" />
         </button>
       </div>
 
-      {mobileMenuOpen && (
-        <nav className="navbar__mobile" aria-label="Mobile menu">
+      {mobileMenuOpen && <button className="navbar__mobileBackdrop" type="button" aria-label="Close menu" onClick={handleMenuClose} />}
+
+      <nav
+        id="navbar-mobile-menu"
+        className={mobileMenuOpen ? 'navbar__mobile navbar__mobile--open' : 'navbar__mobile'}
+        aria-label="Mobile menu"
+      >
+        <div className="navbar__mobileHeader">
+          <span className="navbar__mobileTitle">Menu</span>
+          <button
+            className="navbar__mobileClose"
+            type="button"
+            aria-label="Close menu"
+            onClick={handleMenuClose}
+          >
+            <span className="navbar__mobileCloseIcon" aria-hidden="true" />
+          </button>
+        </div>
+        <div className="navbar__mobileBody">
           {filteredNavLinks.map((item) => (
             <Link
               key={`mobile-${item.path}-${item.label}`}
@@ -124,8 +157,8 @@ function NavBar() {
             )}
             {orderCount > 0 && <span className="navbar__badge">{orderCount}</span>}
           </Link>
-        </nav>
-      )}
+        </div>
+      </nav>
     </header>
 
     </>

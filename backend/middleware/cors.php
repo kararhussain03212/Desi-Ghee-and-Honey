@@ -10,6 +10,21 @@ require_once __DIR__ . '/../config/env.php';
 
 final class CorsMiddleware
 {
+    private static function isLocalOrigin(string $origin): bool
+    {
+        if ($origin === '') {
+            return false;
+        }
+
+        $parts = parse_url($origin);
+        if (!is_array($parts)) {
+            return false;
+        }
+
+        $host = strtolower((string) ($parts['host'] ?? ''));
+        return in_array($host, ['localhost', '127.0.0.1', '::1'], true);
+    }
+
     public static function handle(): void
     {
         Env::load(dirname(__DIR__) . '/.env');
@@ -25,6 +40,9 @@ final class CorsMiddleware
             if (in_array('*', $allowedOrigins, true)) {
                 $allowedOrigin = '*';
             } elseif ($requestOrigin !== '' && in_array($requestOrigin, $allowedOrigins, true)) {
+                $allowedOrigin = $requestOrigin;
+            } elseif (self::isLocalOrigin($requestOrigin)) {
+                // Allow local tooling origins (Vite/Live Server/etc.) without editing production CORS list.
                 $allowedOrigin = $requestOrigin;
             }
         }

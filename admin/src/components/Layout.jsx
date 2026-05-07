@@ -19,6 +19,7 @@ const navItems = [
   { path: "/settings/home-offer", label: "Home - Offer", child: true, childGroup: "home" },
   { path: "/settings/home-testimonials", label: "Home - Testimonials", child: true, childGroup: "home" },
   { path: "/settings/home-newsletter", label: "Home - Newsletter", child: true, childGroup: "home" },
+  { path: "/settings/home-video", label: "Home - Video", child: true, childGroup: "home" },
   { path: "/settings/about", label: "About Page" },
   { path: "/settings/about-hero", label: "About - Hero", child: true, childGroup: "about" },
   { path: "/settings/about-info", label: "About - Info", child: true, childGroup: "about" },
@@ -46,6 +47,7 @@ const pageTitleMap = {
   "/settings/home-offer": "Home - Offer Settings",
   "/settings/home-testimonials": "Home - Testimonials Settings",
   "/settings/home-newsletter": "Home - Newsletter Settings",
+  "/settings/home-video": "Home - Video Settings",
   "/settings/footer": "Footer Settings",
   "/settings/product": "Product Page Settings",
   "/settings/contact": "Contact & WhatsApp Settings",
@@ -63,6 +65,7 @@ export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [homeDropdownOpen, setHomeDropdownOpen] = useState(false);
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const { user, logout } = useAuth();
   const isAdmin = normalizeUserRole(user?.role) === "admin";
   const location = useLocation();
@@ -96,13 +99,32 @@ export default function Layout({ children }) {
     }
   }, [location.pathname]);
 
-  const handleLogout = () => {
-    const confirmed = window.confirm("Are you sure you want to logout?");
-    if (!confirmed) return;
+  const requestLogout = () => {
+    setLogoutDialogOpen(true);
+  };
 
+  const closeLogoutDialog = () => {
+    setLogoutDialogOpen(false);
+  };
+
+  const handleLogout = () => {
+    setLogoutDialogOpen(false);
     logout();
     navigate("/login");
   };
+
+  useEffect(() => {
+    if (!logoutDialogOpen) return undefined;
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setLogoutDialogOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [logoutDialogOpen]);
 
   const resolveProfilePhoto = (value) => {
     const raw = String(value || "").trim();
@@ -272,7 +294,7 @@ export default function Layout({ children }) {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                handleLogout();
+                requestLogout();
               }}
               className="text-sm text-[var(--admin-muted)] hover:text-white"
               aria-label="Logout"
@@ -302,7 +324,7 @@ export default function Layout({ children }) {
 
           <button
             type="button"
-            onClick={handleLogout}
+            onClick={requestLogout}
             className="rounded-lg border border-[var(--admin-border-amber)] bg-[var(--admin-primary)] px-3 py-1.5 text-sm font-semibold text-black hover:bg-[var(--admin-amber)] sm:px-3.5"
           >
             Logout
@@ -311,6 +333,33 @@ export default function Layout({ children }) {
 
         <main className="flex-1 p-4 text-white sm:p-6">{children}</main>
       </div>
+
+      {logoutDialogOpen ? (
+        <div className="fixed inset-0 z-[140] flex items-center justify-center bg-black/65 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-[var(--admin-border-amber)] bg-[var(--admin-card)] p-6 shadow-[0_24px_60px_rgba(0,0,0,0.45)]">
+            <h3 className="text-xl font-bold text-white">Logout</h3>
+            <p className="mt-3 text-sm leading-6 text-white/75">
+              Are you sure you want to logout from the admin panel?
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={closeLogoutDialog}
+                className="rounded-lg border border-[var(--admin-border)] bg-[var(--admin-bg-deep)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--admin-card-elevated)]"
+              >
+                No
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-lg border border-[var(--admin-border-amber)] bg-[var(--admin-primary)] px-4 py-2 text-sm font-semibold text-black hover:bg-[var(--admin-primary-strong)]"
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

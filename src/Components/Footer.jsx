@@ -9,6 +9,8 @@ import { getBackendBaseUrl } from '../utils/runtimeApi.js'
 
 function Footer() {
   const [showTop, setShowTop] = useState(false)
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterMsg, setNewsletterMsg] = useState("");
   const { settings } = useContent()
   const backendBase = getBackendBaseUrl()
   const toAssetUrl = (path) => {
@@ -41,6 +43,9 @@ function Footer() {
     'footer_contact_email',
     getSettingText(settings, 'contact_email_text', getSettingText(settings, 'contact_email', 'info@swiftsigngeneraltrading.com')),
   )
+  const normalizedContactEmail = String(contactEmail || "")
+    .trim()
+    .replace(/\s+/g, "");
   const footerAccountTitle = getSettingText(
     settings,
     "footer_account_title",
@@ -87,6 +92,20 @@ function Footer() {
 
   const footerSocials = getSettingJson(settings, "footer_social_links", []);
 
+  const onNewsletterSubmit = (e) => {
+    e.preventDefault();
+    const email = String(newsletterEmail || "").trim();
+    const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    if (!isValid) {
+      setNewsletterMsg("Please enter a valid email address.");
+      return;
+    }
+
+    setNewsletterMsg("Thanks for subscribing.");
+    setNewsletterEmail("");
+  };
+
   useEffect(() => {
     const onScroll = () => {
       setShowTop(window.scrollY > 260)
@@ -103,7 +122,11 @@ function Footer() {
           <div className="footer__col">
             <Link className="footer__brand" to="/" aria-label="Home">
               {footerLogo ? (
-                <img src={toAssetUrl(footerLogo)} alt={brandText} className="footer__brandIcon" />
+                <img
+                  src={toAssetUrl(footerLogo)}
+                  alt={brandText}
+                  className="footer__brandIcon"
+                />
               ) : (
                 <GiHoneyJar className="footer__brandIcon" aria-hidden="true" />
               )}
@@ -112,22 +135,22 @@ function Footer() {
             <p className="footer__desc">{footerDescription}</p>
             <div className="footer__social" aria-label="Social links">
               {footerSocials.map((social) => {
-                let Icon = FaFacebookF
-                if (social.icon === 'tiktok') Icon = FaTiktok
-                if (social.icon === 'instagram') Icon = FaInstagram
+                let Icon = FaFacebookF;
+                if (social.icon === "tiktok") Icon = FaTiktok;
+                if (social.icon === "instagram") Icon = FaInstagram;
 
                 return (
                   <a
                     key={`${social.label}-${social.url}`}
                     className="footer__socialBtn"
-                    href={social.url || '#'}
+                    href={social.url || "#"}
                     aria-label={social.label}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <Icon aria-hidden="true" />
                   </a>
-                )
+                );
               })}
             </div>
           </div>
@@ -142,7 +165,15 @@ function Footer() {
                 <FiPhone aria-hidden="true" /> {contactPhone}
               </li>
               <li className="footer__item">
-                <FiMail aria-hidden="true" /> {contactEmail}
+                <FiMail aria-hidden="true" />{" "}
+                <a
+                  href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(normalizedContactEmail)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={`Send email to ${normalizedContactEmail}`}
+                >
+                  {contactEmail}
+                </a>
               </li>
             </ul>
           </div>
@@ -161,22 +192,39 @@ function Footer() {
           <div className="footer__col">
             <h3 className="footer__heading">{footerNewsletterTitle}</h3>
             <p className="footer__desc">{footerNewsletterDescription}</p>
-            <form className="footer__form" onSubmit={(e) => e.preventDefault()}>
+            <form className="footer__form" onSubmit={onNewsletterSubmit}>
               <label className="footer__field">
                 <span className="footer__sr">Email address</span>
-                <input className="footer__input" type="email" placeholder="Email Address *" required />
+                <input
+                  className="footer__input"
+                  type="email"
+                  placeholder="Email Address *"
+                  required
+                  value={newsletterEmail}
+                  onChange={(ev) => {
+                    setNewsletterEmail(ev.target.value);
+                    if (newsletterMsg) setNewsletterMsg("");
+                  }}
+                />
               </label>
-              <button className="footer__send" type="submit" aria-label="Subscribe">
+              <button
+                className="footer__send"
+                type="submit"
+                aria-label="Subscribe"
+              >
                 <FiSend aria-hidden="true" />
               </button>
             </form>
+            {newsletterMsg ? (
+              <p className="footer__desc">{newsletterMsg}</p>
+            ) : null}
           </div>
         </div>
       </div>
 
       <div className="footer__bottom">
         <div className="footer__bottomInner">
-          {footerCopyright}{' '}
+          {footerCopyright}{" "}
           <a href={footerCreditUrl} target="_blank" rel="noopener noreferrer">
             {footerCreditText}
           </a>
@@ -185,14 +233,16 @@ function Footer() {
 
       <button
         type="button"
-        className={showTop ? 'footer__topBtn footer__topBtn--show' : 'footer__topBtn'}
+        className={
+          showTop ? "footer__topBtn footer__topBtn--show" : "footer__topBtn"
+        }
         aria-label="Back to top"
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
       >
         <FiArrowUp aria-hidden="true" />
       </button>
     </footer>
-  )
+  );
 }
 
 export default Footer

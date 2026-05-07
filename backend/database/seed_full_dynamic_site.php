@@ -173,6 +173,14 @@ $settings = [
     'contact_email' => 'info@swiftsigngeneraltrading.com',
     'whatsapp_number' => '923338399480',
     'whatsapp_tooltip' => 'Chat with us!',
+    'contact_form_name_placeholder' => 'Name',
+    'contact_form_lastname_placeholder' => 'Lastname',
+    'contact_form_email_placeholder' => 'Email',
+    'contact_form_subject_placeholder' => 'Subject',
+    'contact_form_message_placeholder' => 'Message',
+    'contact_form_title' => 'Quick Contact Form',
+    'contact_form_button_text' => 'SEND MESSAGE',
+    'contact_form_whatsapp_prefix' => 'Contact Form Submission',
 ];
 
 try {

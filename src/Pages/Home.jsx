@@ -76,6 +76,38 @@ function getRatingStars(rating) {
   })
 }
 
+function getYouTubeEmbedUrl(input) {
+  const raw = String(input || '').trim()
+  if (!raw) return ''
+
+  if (/^[a-zA-Z0-9_-]{11}$/.test(raw)) {
+    return `https://www.youtube.com/embed/${raw}`
+  }
+
+  try {
+    const url = new URL(raw)
+    const host = url.hostname.replace(/^www\./i, '').toLowerCase()
+    let videoId = ''
+
+    if (host === 'youtu.be') {
+      videoId = url.pathname.split('/').filter(Boolean)[0] || ''
+    } else if (host.includes('youtube.com')) {
+      if (url.pathname === '/watch') {
+        videoId = url.searchParams.get('v') || ''
+      } else if (url.pathname.startsWith('/embed/')) {
+        videoId = url.pathname.split('/')[2] || ''
+      } else if (url.pathname.startsWith('/shorts/')) {
+        videoId = url.pathname.split('/')[2] || ''
+      }
+    }
+
+    if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) return ''
+    return `https://www.youtube.com/embed/${videoId}`
+  } catch {
+    return ''
+  }
+}
+
 function Home() {
   const { products, heroSlides: apiHeroSlides, testimonials: apiTestimonials, settings } = useContent()
   const homeAboutActive = isSectionActive(settings, 'home_about', true)
@@ -83,6 +115,7 @@ function Home() {
   const homeOfferActive = isSectionActive(settings, 'home_offer', true)
   const homeTestimonialsActive = isSectionActive(settings, 'home_testimonials', true)
   const homeNewsletterActive = isSectionActive(settings, 'home_newsletter', true)
+  const homeVideoActive = isSectionActive(settings, 'home_video', true)
   const backendBase = getBackendBaseUrl()
   const toAssetUrl = (path, fallback) => {
     if (!path) return fallback
@@ -215,6 +248,10 @@ function Home() {
     "home_newsletter_error",
     "",
   );
+  const homeVideoTitle = getSettingText(settings, 'home_video_title', '')
+  const homeVideoDescription = getSettingText(settings, 'home_video_description', '')
+  const homeVideoUrl = getSettingText(settings, 'home_video_url', '')
+  const homeVideoEmbedUrl = getYouTubeEmbedUrl(homeVideoUrl)
 
   const slides = useMemo(
     () =>
@@ -260,6 +297,12 @@ function Home() {
     setNewsletterStatus('success')
     setNewsletterEmail('')
   }
+
+  useEffect(() => {
+    if (newsletterStatus === 'idle') return undefined
+    const timeoutId = window.setTimeout(() => setNewsletterStatus('idle'), 3500)
+    return () => window.clearTimeout(timeoutId)
+  }, [newsletterStatus])
 
   const [clientIndex, setClientIndex] = useState(0)
   const [clientNoTransition, setClientNoTransition] = useState(false)
@@ -571,6 +614,30 @@ function Home() {
       </section>
       ) : null}
 
+      {homeVideoActive && homeVideoEmbedUrl ? (
+      <section className="homeVideoSection" aria-label="Home page video">
+        <div className="homeVideoSection__inner">
+          {homeVideoTitle ? (
+            <h2 className="homeVideoSection__title">{homeVideoTitle}</h2>
+          ) : null}
+          {homeVideoDescription ? (
+            <p className="homeVideoSection__desc">{homeVideoDescription}</p>
+          ) : null}
+          <div className="homeVideoSection__frameWrap">
+            <iframe
+              className="homeVideoSection__frame"
+              src={homeVideoEmbedUrl}
+              title={homeVideoTitle || 'Video'}
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      </section>
+      ) : null}
+
       {homeNewsletterActive ? (
       <section className="newsletterSection" aria-label="Newsletter subscription">
         <div className="newsletterCard">
@@ -603,16 +670,20 @@ function Home() {
               <button className="newsletterBtn" type="submit">{newsletterButtonText}</button>
             </form>
 
-            {newsletterStatus === 'success' ? (
-              <p className="newsletterMsg newsletterMsg--success">{newsletterSuccessText}</p>
-            ) : null}
-            {newsletterStatus === 'error' ? (
-              <p className="newsletterMsg newsletterMsg--error">{newsletterErrorText}</p>
-            ) : null}
+            <div className="newsletterMsgSlot" aria-live="polite" aria-atomic="true">
+              {newsletterStatus === 'success' ? (
+                <p className="newsletterMsg newsletterMsg--success">{newsletterSuccessText}</p>
+              ) : null}
+              {newsletterStatus === 'error' ? (
+                <p className="newsletterMsg newsletterMsg--error">{newsletterErrorText}</p>
+              ) : null}
+            </div>
           </div>
         </div>
       </section>
       ) : null}
+
+      
     </main>
   )
 }

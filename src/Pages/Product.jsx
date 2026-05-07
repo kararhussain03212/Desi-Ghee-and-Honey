@@ -18,6 +18,39 @@ function getRatingStars(rating) {
   })
 }
 
+function getYouTubeEmbedUrl(input) {
+  const raw = String(input || "").trim();
+  if (!raw) return "";
+
+  // Support direct video IDs.
+  if (/^[a-zA-Z0-9_-]{11}$/.test(raw)) {
+    return `https://www.youtube.com/embed/${raw}`;
+  }
+
+  try {
+    const url = new URL(raw);
+    const host = url.hostname.replace(/^www\./i, "").toLowerCase();
+    let videoId = "";
+
+    if (host === "youtu.be") {
+      videoId = url.pathname.split("/").filter(Boolean)[0] || "";
+    } else if (host.includes("youtube.com")) {
+      if (url.pathname === "/watch") {
+        videoId = url.searchParams.get("v") || "";
+      } else if (url.pathname.startsWith("/embed/")) {
+        videoId = url.pathname.split("/")[2] || "";
+      } else if (url.pathname.startsWith("/shorts/")) {
+        videoId = url.pathname.split("/")[2] || "";
+      }
+    }
+
+    if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) return "";
+    return `https://www.youtube.com/embed/${videoId}`;
+  } catch {
+    return "";
+  }
+}
+
 function Product() {
   const { products, settings } = useContent()
   const productActive = isSectionActive(settings, 'product', true)
@@ -67,41 +100,159 @@ function Product() {
     "product_catalog_description",
     "",
   );
+  const productVideoTitle = getSettingText(settings, "product_video_title", "");
+  const productVideoDescription = getSettingText(
+    settings,
+    "product_video_description",
+    "",
+  );
+  const productVideoUrl = getSettingText(settings, "product_video_url", "");
+  const productVideoEmbedUrl = getYouTubeEmbedUrl(productVideoUrl);
 
   return (
     <main className="productPage" aria-label="Product page">
-      <section className="aboutHero" aria-label="About hero" style={{ backgroundImage: `url(${heroImage})` }}>
+      <section
+        className="aboutHero"
+        aria-label="About hero"
+        style={{ backgroundImage: `url(${heroImage})` }}
+      >
         {/* <img className="aboutHero__decor aboutHero__decor--left" src={honeyL} alt="" />
         <img className="aboutHero__decor aboutHero__decor--right" src={icon2} alt="" /> */}
 
-        <div className="aboutHero__inner" data-aos="fade-up" data-aos-duration="1000">
+        <div
+          className="aboutHero__inner"
+          data-aos="fade-up"
+          data-aos-duration="1000"
+        >
           <h1 className="aboutHero__title">{heroTitle}</h1>
           <p className="aboutHero__crumbs" aria-label="Breadcrumb">
             <Link className="aboutHero__crumbLink" to="/">
               {breadcrumbHome}
-            </Link>{' '}
+            </Link>{" "}
             <span className="aboutHero__sep" aria-hidden="true">
               /
-            </span>{' '}
+            </span>{" "}
             <span className="aboutHero__crumbCurrent">{breadcrumbCurrent}</span>
           </p>
         </div>
       </section>
 
       <section className="productShowcase" aria-label="Our product showcase">
+        <div className="productsInner">
+          <h2 className="productsTitle">
+            {catalogTitle} <span>{catalogTitleHighlight}</span>
+          </h2>
+          <p className="productsDesc">{catalogDescription}</p>
+
+          <div className="productsGrid">
+            {products.slice(0, 8).map((p) => (
+              <article
+                key={p.id}
+                className="productCard"
+                data-aos="flip-left"
+                data-aos-duration="2000"
+              >
+                <div className="productMedia">
+                  <Link
+                    className="productLink"
+                    to={`/product/${p.id}`}
+                    aria-label={`Open ${p.title}`}
+                  >
+                    <img
+                      className="productImg"
+                      src={p.image}
+                      alt={p.title}
+                      loading="lazy"
+                    />
+                  </Link>
+                  <span className="productBadge" aria-label={p.badge}>
+                    {p.badge}
+                  </span>
+                </div>
+                <div className="productBody">
+                  <h3 className="productTitle">
+                    <Link className="productTitleLink" to={`/product/${p.id}`}>
+                      {p.title}
+                    </Link>
+                  </h3>
+                  <div className="productMeta">
+                    <div
+                      className={
+                        p.variants?.length
+                          ? "productPrice productPrice--multi"
+                          : "productPrice"
+                      }
+                    >
+                      {p.variants?.length ? (
+                        p.variants.map((v, idx) => (
+                          <span
+                            key={v.label}
+                            className={
+                              idx === 0 ? "productPriceNow" : "productPriceSub"
+                            }
+                          >
+                            {v.label}: {formatRs(v.price)}
+                          </span>
+                        ))
+                      ) : (
+                        <>
+                          <span className="productPriceNow">
+                            {formatRs(p.price)}
+                          </span>
+                          {Number.isFinite(Number(p.oldPrice)) &&
+                          Number(p.oldPrice) > Number(p.price) ? (
+                            <span className="productPriceOld">
+                              {formatRs(p.oldPrice)}
+                            </span>
+                          ) : null}
+                        </>
+                      )}
+                    </div>
+                    <div
+                      className="productRating"
+                      aria-label={`${p.rating} out of 5 stars`}
+                    >
+                      {getRatingStars(p.rating).map(({ Icon, on }, i) => (
+                        <Icon
+                          key={i}
+                          className={
+                            on ? "productStar productStar--on" : "productStar"
+                          }
+                          aria-hidden="true"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
         <div className="productShowcase__container">
           <div className="productShowcase__top">
             <div className="productShowcase__left">
-              <p className="productShowcase__kicker" data-aos="fade-down" data-aos-duration="1000">
+              <p
+                className="productShowcase__kicker"
+                data-aos="fade-down"
+                data-aos-duration="1000"
+              >
                 {showcaseKicker}
               </p>
-              <h2 className="productShowcase__title" data-aos="fade-left" data-aos-duration="1000">
+              <h2
+                className="productShowcase__title"
+                data-aos="fade-left"
+                data-aos-duration="1000"
+              >
                 {showcaseTitle}
               </h2>
             </div>
             <div className="productShowcase__right">
-              <p className="productShowcase__text" data-aos="fade-right" data-aos-duration="1000">
-               {showcaseText}
+              <p
+                className="productShowcase__text"
+                data-aos="fade-right"
+                data-aos-duration="1000"
+              >
+                {showcaseText}
               </p>
               {/* <a className="productShowcase__btn" href="#shop" aria-label="Shop online">
                 Shop Online
@@ -111,17 +262,24 @@ function Product() {
 
           <div className="productShowcase__grid" aria-label="Product images">
             {showcaseProducts.map((product, index) => (
-              <Link 
+              <Link
                 key={product.id}
-                className="productShowcaseCard" 
-                to={`/product/${product.id}`} 
-                aria-label={`Open ${product.title}`} 
-                data-aos="flip-left" 
+                className="productShowcaseCard"
+                to={`/product/${product.id}`}
+                aria-label={`Open ${product.title}`}
+                data-aos="flip-left"
                 data-aos-duration={(index + 1) * 1000}
               >
-                <img className="productShowcaseCard__img" src={product.image} alt={product.title} loading="lazy" />
+                <img
+                  className="productShowcaseCard__img"
+                  src={product.image}
+                  alt={product.title}
+                  loading="lazy"
+                />
                 <div className="productShowcaseCard__overlay">
-                  <p className="productShowcaseCard__overlayText">{product.title}</p>
+                  <p className="productShowcaseCard__overlayText">
+                    {product.title}
+                  </p>
                 </div>
               </Link>
             ))}
@@ -129,64 +287,37 @@ function Product() {
         </div>
       </section>
 
-      <section className="productsSection" id="shop" aria-label="Fresh honey products">
-              <div className="productsInner">
-                <h2 className="productsTitle">
-                  {catalogTitle} <span>{catalogTitleHighlight}</span>
-                </h2>
-                <p className="productsDesc">
-                  {catalogDescription}
-                </p>
-      
-                <div className="productsGrid">
-                  {products.slice(0, 8).map((p) => (
-                    <article key={p.id} className="productCard" data-aos="flip-left" data-aos-duration="2000">
-                      <div className="productMedia">
-                        <Link className="productLink" to={`/product/${p.id}`} aria-label={`Open ${p.title}`}>
-                          <img className="productImg" src={p.image} alt={p.title} loading="lazy" />
-                        </Link>
-                        <span className="productBadge" aria-label={p.badge}>
-                          {p.badge}
-                        </span>
-                      </div>
-                      <div className="productBody">
-                        <h3 className="productTitle">
-                          <Link className="productTitleLink" to={`/product/${p.id}`}>
-                            {p.title}
-                          </Link>
-                        </h3>
-                        <div className="productMeta">
-                          <div className={p.variants?.length ? 'productPrice productPrice--multi' : 'productPrice'}>
-                            {p.variants?.length ? (
-                              p.variants.map((v, idx) => (
-                                <span key={v.label} className={idx === 0 ? 'productPriceNow' : 'productPriceSub'}>
-                                  {v.label}: {formatRs(v.price)}
-                                </span>
-                              ))
-                            ) : (
-                              <>
-                                <span className="productPriceNow">{formatRs(p.price)}</span>
-                                {Number.isFinite(Number(p.oldPrice)) && Number(p.oldPrice) > Number(p.price) ? (
-                                  <span className="productPriceOld">{formatRs(p.oldPrice)}</span>
-                                ) : null}
-                              </>
-                            )}
-                          </div>
-                          <div className="productRating" aria-label={`${p.rating} out of 5 stars`}>
-                            {getRatingStars(p.rating).map(({ Icon, on }, i) => (
-                              <Icon key={i} className={on ? 'productStar productStar--on' : 'productStar'} aria-hidden="true" />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </div>
-            </section>
+      {productVideoEmbedUrl ? (
+        <section className="productVideoSection" aria-label="Product video">
+          <div className="productVideoSection__inner">
+            {productVideoTitle ? (
+              <h2 className="productVideoSection__title">{productVideoTitle}</h2>
+            ) : null}
+            {productVideoDescription ? (
+              <p className="productVideoSection__desc">{productVideoDescription}</p>
+            ) : null}
+            <div className="productVideoSection__frameWrap">
+              <iframe
+                className="productVideoSection__frame"
+                src={productVideoEmbedUrl}
+                title={productVideoTitle || "Video"}
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </section>
+      ) : null}
 
+      {/* <section
+        className="productsSection"
+        id="shop"
+        aria-label="Fresh honey products"
+      ></section> */}
     </main>
-  )
+  );
 }
 
 export default Product

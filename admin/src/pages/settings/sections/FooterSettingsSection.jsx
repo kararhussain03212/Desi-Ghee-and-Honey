@@ -70,7 +70,10 @@ export default function FooterSettingsSection({
       <div className="space-y-3 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-card-elevated)] p-4">
         <h4 className="text-sm font-semibold text-[var(--admin-ink)]">Footer Social Links</h4>
         {footerSocialLinks.map((item, index) => (
-          <div key={`footer-social-${index}`} className="grid grid-cols-1 gap-2 md:grid-cols-[1fr_1fr_1fr_auto]">
+          <div
+            key={`footer-social-${index}`}
+            className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-[minmax(150px,1fr)_minmax(180px,1.2fr)_minmax(120px,0.8fr)_100px] xl:items-center"
+          >
             <input
               type="text"
               placeholder="Label"
@@ -101,7 +104,7 @@ export default function FooterSettingsSection({
             <button
               type="button"
               onClick={() => setFooterSocialLinks((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== index) : prev))}
-              className="rounded-lg border border-red-500 bg-red-500/10 px-3 py-2 font-medium text-red-400 hover:bg-red-500/20"
+              className="w-full rounded-lg border border-red-500 bg-red-500/10 px-3 py-2 font-medium text-red-400 hover:bg-red-500/20 md:col-span-2 xl:col-span-1"
             >
               Remove
             </button>

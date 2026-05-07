@@ -54,27 +54,27 @@ function Contact() {
   const formNamePlaceholder = getSettingText(
     settings,
     "contact_form_name_placeholder",
-    "",
+    "First Name",
   );
   const formLastnamePlaceholder = getSettingText(
     settings,
     "contact_form_lastname_placeholder",
-    "",
+    "Last Name",
   );
   const formEmailPlaceholder = getSettingText(
     settings,
     "contact_form_email_placeholder",
-    "",
+    "Email",
   );
   const formSubjectPlaceholder = getSettingText(
     settings,
     "contact_form_subject_placeholder",
-    "",
+    "Subject",
   );
   const formMessagePlaceholder = getSettingText(
     settings,
     "contact_form_message_placeholder",
-    "",
+    "Message",
   );
   const formButtonText = getSettingText(
     settings,
@@ -177,7 +177,9 @@ function Contact() {
                 </div>
                 <div>
                   <h3 className="contactCardTitle">{emailTitle}</h3>
-                  <p className="contactCardText">{emailText}</p>
+                  <p className="contactCardText">
+                    <a href={`mailto:${String(emailText || '').trim()}`}>{emailText}</a>
+                  </p>
                 </div>
               </article>
             </div>
@@ -188,7 +190,7 @@ function Contact() {
             <form className="contactForm" onSubmit={handleSubmit}>
               <div className="contactFormGrid">
                 <label className="contactField">
-                  <span className="contactSr">Name</span>
+                  <span className="contactSr">First Name</span>
                   <input
                     className="contactInput"
                     type="text"
@@ -200,13 +202,13 @@ function Contact() {
                   />
                 </label>
                 <label className="contactField">
-                  <span className="contactSr">Lastname</span>
+                  <span className="contactSr">Last Name</span>
                   <input
                     className="contactInput"
                     type="text"
                     name="lastname"
                     placeholder={formLastnamePlaceholder}
-                    value={formData.lastname}
+                    value={formData['lastname']}
                     onChange={handleChange}
                     required
                   />

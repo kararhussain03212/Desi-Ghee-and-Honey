@@ -214,6 +214,14 @@ export default function App() {
             }
           />
           <Route
+            path="/settings/home-video"
+            element={
+              <ProtectedPage>
+                <SiteSettings forcedMainSection="home" forcedHomeSection="video" />
+              </ProtectedPage>
+            }
+          />
+          <Route
             path="/settings/footer"
             element={
               <ProtectedPage>

@@ -1,13 +1,24 @@
 import api from "./axios";
 
 export const uploadImage = async (file, folder = "misc") => {
+  if (!file) {
+    throw new Error("No file selected");
+  }
+
   const payload = new FormData();
   payload.append("file", file);
   payload.append("folder", folder);
 
-  const { data } = await api.post("/admin/upload", payload, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-
-  return data?.data?.path || "";
+  try {
+    // Let the browser set the multipart boundary automatically.
+    const { data } = await api.post("/admin/upload", payload);
+    return data?.data?.path || "";
+  } catch (error) {
+    const apiError =
+      error?.response?.data?.error ||
+      error?.response?.data?.message ||
+      error?.message ||
+      "Image upload failed";
+    throw new Error(apiError);
+  }
 };

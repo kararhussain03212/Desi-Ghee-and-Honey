@@ -17,8 +17,11 @@ CorsMiddleware::handle();
 Env::load(__DIR__ . '/.env');
 
 $appEnv = Env::get('APP_ENV', 'local');
+$host = strtolower((string) ($_SERVER['HTTP_HOST'] ?? ''));
+$host = trim(explode(':', $host)[0] ?? '');
+$isLocalHost = in_array($host, ['localhost', '127.0.0.1', '::1'], true);
 $httpsEnabled = ($_SERVER['HTTPS'] ?? '') === 'on' || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
-if ($appEnv === 'production' && !$httpsEnabled) {
+if ($appEnv === 'production' && !$httpsEnabled && !$isLocalHost) {
     Response::error('HTTPS is required in production', 403);
 }
 
