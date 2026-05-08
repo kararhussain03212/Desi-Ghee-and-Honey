@@ -7,6 +7,7 @@ import { getBackendRoot } from "../../api/runtimeApi";
 
 const getInitialForm = () => ({
   title: "",
+  slug: "",
   description: "",
   sku: "",
   badge: "",
@@ -18,6 +19,7 @@ const getInitialForm = () => ({
   status: "active",
   imageFile: null,
   imagePreview: "",
+  imageAlt: "",
 });
 
 export default function ProductForm() {
@@ -62,6 +64,7 @@ export default function ProductForm() {
 
         setForm({
           title: item.title || "",
+          slug: item.slug || "",
           description: item.description || "",
           sku: item.sku || "",
           badge: item.badge || "",
@@ -81,6 +84,7 @@ export default function ProductForm() {
           status: item.status === "inactive" ? "inactive" : "active",
           imageFile: null,
           imagePreview: toImageUrl(item.image_path || ""),
+          imageAlt: item.image_alt || "",
         });
       } catch (err) {
         console.error(err);
@@ -117,7 +121,8 @@ export default function ProductForm() {
 
       let imagePath = "";
       if (form.imageFile) {
-        imagePath = await uploadImage(form.imageFile, "products");
+        const oldPath = isEditMode && form.imagePreview ? form.imagePreview.replace(apiRoot, "") : "";
+        imagePath = await uploadImage(form.imageFile, "products", oldPath);
       } else if (form.imagePreview) {
         imagePath = form.imagePreview.replace(apiRoot, "");
       }
@@ -131,12 +136,14 @@ export default function ProductForm() {
 
       const payload = {
         title: form.title.trim(),
+        slug: form.slug.trim(),
         description: form.description.trim(),
         sku: form.sku.trim(),
         badge: form.badge.trim(),
         price: Number(form.price || 0),
         old_price: form.oldPrice === "" ? null : Number(form.oldPrice),
         rating: Number(form.rating || 5),
+        image_alt: form.imageAlt.trim(),
         variants_json: JSON.stringify(normalizedVariants),
         order_position: Number(form.orderPosition || 0),
         status: form.status === "inactive" ? "inactive" : "active",
@@ -188,6 +195,16 @@ export default function ProductForm() {
               value={form.title}
               onChange={(e) => setField("title", e.target.value)}
               required
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm text-white/80">Slug</label>
+            <input
+              value={form.slug}
+              onChange={(e) => setField("slug", e.target.value)}
+              placeholder="auto-generated-if-empty"
               className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
             />
           </div>
@@ -336,6 +353,16 @@ export default function ProductForm() {
           helperText="Main image shown on frontend product cards"
           required={!isEditMode}
         />
+
+        <div>
+          <label className="mb-1 block text-sm text-white/80">Product Image Alt Text</label>
+          <input
+            value={form.imageAlt}
+            onChange={(e) => setField("imageAlt", e.target.value)}
+            placeholder="Describe the product image for SEO"
+            className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
+          />
+        </div>
 
         <label className="flex items-center gap-2 text-sm text-white/85">
           <input

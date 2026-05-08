@@ -7,9 +7,12 @@ import { formatRs } from '../utils/money.js'
 
 
 function ProductDetails() {
-  const { id } = useParams()
+  const { slug } = useParams()
   const { products, settings } = useContent()
-  const product = useMemo(() => products.find((p) => p.id === id), [id, products])
+  const product = useMemo(
+    () => products.find((p) => p.slug === slug || p.id === slug),
+    [products, slug],
+  )
   const [qty, setQty] = useState(1)
   const [selectedVariant, setSelectedVariant] = useState(null)
   const [whatsappPromptOpen, setWhatsappPromptOpen] = useState(false)
@@ -59,14 +62,14 @@ function ProductDetails() {
   const inOrder = product ? order.some((x) => x.id.startsWith(product.id)) : false
 
   const whatsappMessage = useMemo(() => {
-    const productLink = `${window.location.origin}/product/${product?.id ?? ''}`
+    const productLink = `${window.location.origin}/product/${product?.slug || product?.id || ''}`
 
     if (detailed.length) {
       const lines = detailed
         .map(({ product: p, variant, qty: q, price: itemPrice }, idx) => {
           const rowPrice = itemPrice || Number(p.price) || 0
           const rowTotal = rowPrice * q
-          const link = `${window.location.origin}/product/${p.id}`
+          const link = `${window.location.origin}/product/${p.slug || p.id}`
           const imageUrl = new URL(p.image, window.location.origin).href
           const variantStr = variant ? ` (${variant.label})` : ''
           return `${idx + 1}) ${p.title}${variantStr}\n   Code: ${p.code}\n   Qty: ${q}\n   Price: ${formatRs(
@@ -137,7 +140,7 @@ function ProductDetails() {
       <section className="pdSection">
         <div className="pdInner pdGrid">
           <div className="pdMedia">
-            <img className="pdImg" src={product.image} alt={product.title} />
+            <img className="pdImg" src={product.image} alt={product.imageAlt || product.title} />
           </div>
 
           <div className="pdContent">

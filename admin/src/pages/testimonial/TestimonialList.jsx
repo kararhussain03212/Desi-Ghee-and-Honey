@@ -154,7 +154,7 @@ export default function TestimonialList() {
                     <div className="mb-3 flex items-center gap-3">
                       <img
                         src={resolveImage(item.avatar_path)}
-                        alt={item.name || "Customer"}
+                        alt={item.avatar_alt || item.name || "Customer"}
                         onError={(event) => {
                           event.currentTarget.onerror = null;
                           event.currentTarget.src = FALLBACK_AVATAR;
@@ -176,6 +176,9 @@ export default function TestimonialList() {
                     </p>
                     <div className="mt-2 flex flex-wrap gap-2 text-xs">
                       <span className="rounded-md bg-white/10 px-2 py-1 text-white/80">
+                        Slug: {item.slug || "-"}
+                      </span>
+                      <span className="rounded-md bg-white/10 px-2 py-1 text-white/80">
                         Rating: {Number(item.rating || 5)}
                       </span>
                       <span className="rounded-md bg-white/10 px-2 py-1 text-white/80">
@@ -183,6 +186,9 @@ export default function TestimonialList() {
                       </span>
                       <span className="rounded-md bg-white/10 px-2 py-1 text-white/80">
                         Order: {Number(item.order_position || 0)}
+                      </span>
+                      <span className="rounded-md bg-white/10 px-2 py-1 text-white/80">
+                        Alt: {item.avatar_alt || "-"}
                       </span>
                     </div>
                   </div>

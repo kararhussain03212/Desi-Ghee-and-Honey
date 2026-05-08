@@ -140,7 +140,7 @@ export default function SliderList() {
               <div className="grid grid-cols-1 md:grid-cols-[260px_1fr]">
                 <img
                   src={resolveImage(item.image_path)}
-                  alt={item.title || "Slider"}
+                  alt={item.image_alt || item.title || "Slider"}
                   onError={(event) => {
                     event.currentTarget.onerror = null;
                     event.currentTarget.src = FALLBACK_IMAGE;
@@ -161,6 +161,9 @@ export default function SliderList() {
                       </p>
                       <div className="mt-2 flex flex-wrap gap-2 text-xs">
                         <span className="rounded-md bg-white/10 px-2 py-1 text-white/80">
+                          Slug: {item.slug || "-"}
+                        </span>
+                        <span className="rounded-md bg-white/10 px-2 py-1 text-white/80">
                           Status: {item.status || "-"}
                         </span>
                         <span className="rounded-md bg-white/10 px-2 py-1 text-white/80">
@@ -168,6 +171,9 @@ export default function SliderList() {
                         </span>
                         <span className="rounded-md bg-white/10 px-2 py-1 text-white/80">
                           Order: {Number(item.order_position || 0)}
+                        </span>
+                        <span className="rounded-md bg-white/10 px-2 py-1 text-white/80">
+                          Alt: {item.image_alt || "-"}
                         </span>
                       </div>
                     </div>

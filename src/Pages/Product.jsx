@@ -155,13 +155,13 @@ function Product() {
                 <div className="productMedia">
                   <Link
                     className="productLink"
-                    to={`/product/${p.id}`}
+                    to={`/product/${p.slug || p.id}`}
                     aria-label={`Open ${p.title}`}
                   >
                     <img
                       className="productImg"
                       src={p.image}
-                      alt={p.title}
+                      alt={p.imageAlt || p.title}
                       loading="lazy"
                     />
                   </Link>
@@ -171,7 +171,7 @@ function Product() {
                 </div>
                 <div className="productBody">
                   <h3 className="productTitle">
-                    <Link className="productTitleLink" to={`/product/${p.id}`}>
+                    <Link className="productTitleLink" to={`/product/${p.slug || p.id}`}>
                       {p.title}
                     </Link>
                   </h3>
@@ -265,7 +265,7 @@ function Product() {
               <Link
                 key={product.id}
                 className="productShowcaseCard"
-                to={`/product/${product.id}`}
+                to={`/product/${product.slug || product.id}`}
                 aria-label={`Open ${product.title}`}
                 data-aos="flip-left"
                 data-aos-duration={(index + 1) * 1000}
@@ -273,7 +273,7 @@ function Product() {
                 <img
                   className="productShowcaseCard__img"
                   src={product.image}
-                  alt={product.title}
+                  alt={product.imageAlt || product.title}
                   loading="lazy"
                 />
                 <div className="productShowcaseCard__overlay">

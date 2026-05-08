@@ -51,7 +51,7 @@ function Order() {
     const lines = detailed
       .map(({ product, variant, qty, price }, idx) => {
         const rowTotal = price * qty
-        const link = `${window.location.origin}/product/${product.id}`
+        const link = `${window.location.origin}/product/${product.slug || product.id}`
         const imageUrl = new URL(product.image, window.location.origin).href
         const variantStr = variant ? ` (${variant.label})` : ''
         return `${idx + 1}) ${product.title}${variantStr}\n   Code: ${product.code}\n   Qty: ${qty}\n   Price: ${formatRs(

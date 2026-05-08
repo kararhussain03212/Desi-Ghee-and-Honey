@@ -1,6 +1,6 @@
 import api from "./axios";
 
-export const uploadImage = async (file, folder = "misc") => {
+export const uploadImage = async (file, folder = "misc", oldPath = "") => {
   if (!file) {
     throw new Error("No file selected");
   }
@@ -8,6 +8,7 @@ export const uploadImage = async (file, folder = "misc") => {
   const payload = new FormData();
   payload.append("file", file);
   payload.append("folder", folder);
+  if (oldPath) payload.append("old_path", oldPath);
 
   try {
     // Let the browser set the multipart boundary automatically.

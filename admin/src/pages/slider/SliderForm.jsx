@@ -9,6 +9,7 @@ const getInitialForm = () => ({
   titleLine1: "",
   titleLine2: "",
   titleLine3: "",
+  slug: "",
   subtitle: "",
   buttonText: "",
   buttonLink: "/product",
@@ -16,6 +17,7 @@ const getInitialForm = () => ({
   status: "active",
   imageFile: null,
   imagePreview: "",
+  imageAlt: "",
 });
 
 export default function SliderForm() {
@@ -66,6 +68,7 @@ export default function SliderForm() {
           titleLine1: titleLines[0] || "",
           titleLine2: titleLines[1] || "",
           titleLine3: titleLines[2] || "",
+          slug: item.slug || "",
           subtitle: item.subtitle || "",
           buttonText: item.button_text || "Shop Now",
           buttonLink: item.button_link || "/product",
@@ -73,6 +76,7 @@ export default function SliderForm() {
           status: item.status === "inactive" ? "inactive" : "active",
           imageFile: null,
           imagePreview: toImageUrl(item.image_path || ""),
+          imageAlt: item.image_alt || "",
         });
       } catch (err) {
         console.error(err);
@@ -103,7 +107,8 @@ export default function SliderForm() {
 
       let imagePath = "";
       if (form.imageFile) {
-        imagePath = await uploadImage(form.imageFile, "hero");
+        const oldPath = isEditMode && form.imagePreview ? form.imagePreview.replace(apiRoot, "") : "";
+        imagePath = await uploadImage(form.imageFile, "hero", oldPath);
       } else if (form.imagePreview) {
         imagePath = form.imagePreview.replace(apiRoot, "");
       }
@@ -115,9 +120,11 @@ export default function SliderForm() {
 
       const payload = {
         title: mergedTitle,
+        slug: form.slug.trim(),
         subtitle: form.subtitle.trim(),
         button_text: form.buttonText.trim() || "Shop Now",
         button_link: form.buttonLink.trim() || "/product",
+        image_alt: form.imageAlt.trim(),
         order_position: Number(form.orderPosition || 0),
         status: form.status === "inactive" ? "inactive" : "active",
       };
@@ -183,12 +190,22 @@ export default function SliderForm() {
                 className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
               />
             </div>
+            
             <div>
               <label className="mb-1 block text-sm text-white/80">Title Line 3 (Bottom - Optional)</label>
               <input
                 value={form.titleLine3}
                 onChange={(e) => setField("titleLine3", e.target.value)}
                 placeholder="DESI GHEE"
+                className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm text-white/80">Slug</label>
+              <input
+                value={form.slug}
+                onChange={(e) => setField("slug", e.target.value)}
+                placeholder="auto-generated-if-empty"
                 className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
               />
             </div>
@@ -257,6 +274,16 @@ export default function SliderForm() {
           }
           required={!isEditMode}
         />
+
+        <div>
+          <label className="mb-1 block text-sm text-white/80">Slider Image Alt Text</label>
+          <input
+            value={form.imageAlt}
+            onChange={(e) => setField("imageAlt", e.target.value)}
+            placeholder="Describe the slider image for SEO"
+            className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
+          />
+        </div>
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <button

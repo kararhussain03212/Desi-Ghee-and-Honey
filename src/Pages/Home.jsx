@@ -363,7 +363,8 @@ function Home() {
 
             return (
               <SwiperSlide key={`${slide.image}-${i}`}>
-                <div className="hero__slide" style={{ backgroundImage: `url(${slide.image})`, minHeight: 'clamp(520px, 78vh, 820px)' }}>
+                <div className="hero__slide" style={{ minHeight: 'clamp(520px, 78vh, 820px)' }}>
+                  <img className="hero__bgImage" src={slide.image} alt={slide.imageAlt || ''} loading="eager" />
                   <div className="hero__overlay">
                     <div className="hero__content">
                       <h1
@@ -496,14 +497,14 @@ function Home() {
             {products.slice(0, 8).map((p) => (
               <article key={p.id} className="productCard" data-aos="flip-left" data-aos-duration="2000">
                 <div className="productMedia">
-                  <Link className="productLink" to={`/product/${p.id}`} aria-label={`Open ${p.title}`}>
-                    <img className="productImg" src={safeSrc(p.image)} alt={p.title} loading="lazy" />
+                  <Link className="productLink" to={`/product/${p.slug || p.id}`} aria-label={`Open ${p.title}`}>
+                    <img className="productImg" src={safeSrc(p.image)} alt={p.imageAlt || p.title} loading="lazy" />
                   </Link>
                   <span className="productBadge" aria-label={p.badge}>{p.badge}</span>
                 </div>
                 <div className="productBody">
                   <h3 className="productTitle">
-                    <Link className="productTitleLink" to={`/product/${p.id}`}>{p.title}</Link>
+                    <Link className="productTitleLink" to={`/product/${p.slug || p.id}`}>{p.title}</Link>
                   </h3>
                   <div className="productMeta">
                     <div className={p.variants?.length ? 'productPrice productPrice--multi' : 'productPrice'}>
@@ -586,7 +587,7 @@ function Home() {
                   <article className="clientCard">
                     <div className="clientInfo">
                       <div className="clientAvatar">
-                        <img src={safeSrc(c.avatar)} alt={`${c.name} avatar`} loading="lazy" />
+                        <img src={safeSrc(c.avatar)} alt={c.avatarAlt || `${c.name} avatar`} loading="lazy" />
                       </div>
                       <div>
                         <h4 className="clientName">{c.name}</h4>

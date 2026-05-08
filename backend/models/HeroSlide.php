@@ -9,5 +9,5 @@ require_once __DIR__ . '/BaseModel.php';
 final class HeroSlide extends BaseModel
 {
     protected string $table = 'hero_slides';
-    protected array $fillable = ['title', 'subtitle', 'button_text', 'button_link', 'image_path', 'order_position', 'status'];
+    protected array $fillable = ['title', 'slug', 'subtitle', 'button_text', 'button_link', 'image_path', 'image_alt', 'order_position', 'status'];
 }

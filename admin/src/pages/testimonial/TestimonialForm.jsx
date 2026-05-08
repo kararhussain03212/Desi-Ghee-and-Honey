@@ -9,8 +9,16 @@ import {
 import { uploadImage } from "../../api/uploadApi";
 import { getBackendRoot } from "../../api/runtimeApi";
 
+const slugify = (value = "") =>
+  value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
 const getInitialForm = () => ({
   name: "",
+  slug: "",
   role: "Verified Customer",
   review: "",
   rating: 5,
@@ -18,6 +26,7 @@ const getInitialForm = () => ({
   status: "active",
   imageFile: null,
   imagePreview: "",
+  avatarAlt: "",
 });
 
 export default function TestimonialForm() {
@@ -29,6 +38,7 @@ export default function TestimonialForm() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState(getInitialForm);
+  const [slugTouched, setSlugTouched] = useState(false);
 
   const apiRoot = useMemo(() => getBackendRoot(), []);
 
@@ -50,6 +60,7 @@ export default function TestimonialForm() {
   useEffect(() => {
     if (!isEditMode) {
       setForm(getInitialForm());
+      setSlugTouched(false);
       setLoading(false);
       setError("");
       return;
@@ -62,6 +73,7 @@ export default function TestimonialForm() {
 
         setForm({
           name: item.name || "",
+          slug: item.slug || "",
           role: item.role || "Verified Customer",
           review: item.review || "",
           rating: Number(item.rating || 5),
@@ -69,7 +81,9 @@ export default function TestimonialForm() {
           status: item.status === "inactive" ? "inactive" : "active",
           imageFile: null,
           imagePreview: toImageUrl(item.avatar_path || ""),
+          avatarAlt: item.avatar_alt || "",
         });
+        setSlugTouched(Boolean(item.slug));
       } catch (err) {
         console.error(err);
         setError("Failed to load testimonial.");
@@ -80,6 +94,19 @@ export default function TestimonialForm() {
 
     loadTestimonial();
   }, [id, isEditMode, toImageUrl]);
+
+  const handleNameChange = (value) => {
+    setForm((prev) => ({
+      ...prev,
+      name: value,
+      slug: slugTouched ? prev.slug : slugify(value),
+    }));
+  };
+
+  const handleSlugChange = (value) => {
+    setSlugTouched(true);
+    setField("slug", slugify(value));
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -99,16 +126,19 @@ export default function TestimonialForm() {
 
       let imagePath = "";
       if (form.imageFile) {
-        imagePath = await uploadImage(form.imageFile, "testimonials");
+        const oldPath = isEditMode && form.imagePreview ? form.imagePreview.replace(apiRoot, "") : "";
+        imagePath = await uploadImage(form.imageFile, "testimonials", oldPath);
       } else if (form.imagePreview) {
         imagePath = form.imagePreview.replace(apiRoot, "");
       }
 
       const payload = {
         name: form.name.trim(),
+        slug: form.slug.trim(),
         role: form.role.trim() || "Verified Customer",
         review: form.review.trim(),
         rating: Number(form.rating || 5),
+        avatar_alt: form.avatarAlt.trim(),
         order_position: Number(form.orderPosition || 0),
         status: form.status === "inactive" ? "inactive" : "active",
       };
@@ -157,8 +187,17 @@ export default function TestimonialForm() {
             <label className="mb-1 block text-sm text-white/80">Customer Name</label>
             <input
               value={form.name}
-              onChange={(e) => setField("name", e.target.value)}
+              onChange={(e) => handleNameChange(e.target.value)}
               required
+              className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm text-white/80">Slug</label>
+            <input
+              value={form.slug}
+              onChange={(e) => handleSlugChange(e.target.value)}
+              placeholder="auto-generated-if-empty"
               className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
             />
           </div>
@@ -225,6 +264,16 @@ export default function TestimonialForm() {
           helperText="Optional customer photo"
           required={false}
         />
+
+        <div>
+          <label className="mb-1 block text-sm text-white/80">Avatar Alt Text</label>
+          <input
+            value={form.avatarAlt}
+            onChange={(e) => setField("avatarAlt", e.target.value)}
+            placeholder="Describe the testimonial image for SEO"
+            className="w-full rounded-lg border border-white/20 bg-[var(--admin-card)] px-3 py-2 text-white"
+          />
+        </div>
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <button

@@ -14,6 +14,7 @@ abstract class BaseModel
     protected PDO $pdo;
     protected string $table;
     protected array $fillable = [];
+    protected ?array $existingColumns = null;
 
     public function __construct()
     {
@@ -194,7 +195,7 @@ abstract class BaseModel
             return true;
         }
 
-        return in_array($column, $this->fillable, true) || $column === 'id';
+        return in_array($column, $this->getExistingColumns(), true) || $column === 'id';
     }
 
     protected function searchableColumns(): array
@@ -221,14 +222,39 @@ abstract class BaseModel
     protected function sanitizeFillable(array $data): array
     {
         $payload = [];
+        $existingColumns = $this->getExistingColumns();
+
         foreach ($this->fillable as $column) {
             if (!array_key_exists($column, $data)) {
+                continue;
+            }
+            if (!in_array($column, $existingColumns, true)) {
                 continue;
             }
             $payload[$column] = is_string($data[$column]) ? trim($data[$column]) : $data[$column];
         }
 
         return $payload;
+    }
+
+    protected function getExistingColumns(): array
+    {
+        if (is_array($this->existingColumns)) {
+            return $this->existingColumns;
+        }
+
+        try {
+            $stmt = $this->pdo->query('SHOW COLUMNS FROM ' . $this->table);
+            $rows = $stmt ? ($stmt->fetchAll() ?: []) : [];
+            $this->existingColumns = array_values(array_filter(array_map(
+                static fn ($row): string => (string) ($row['Field'] ?? ''),
+                $rows
+            )));
+        } catch (\Throwable $e) {
+            $this->existingColumns = $this->fillable;
+        }
+
+        return $this->existingColumns;
     }
 
     private function buildFilters(array $query, bool $onlyActive): array

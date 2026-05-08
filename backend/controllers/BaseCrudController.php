@@ -69,7 +69,7 @@ abstract class BaseCrudController extends BaseController
             Response::error('Validation failed', 422, ['fields' => $errors]);
         }
 
-        if (isset($payload['title']) && !isset($payload['slug'])) {
+        if (isset($payload['title']) && (!isset($payload['slug']) || trim((string) $payload['slug']) === '')) {
             $payload['slug'] = $this->slugify((string) $payload['title']);
         }
 
@@ -93,7 +93,7 @@ abstract class BaseCrudController extends BaseController
         }
 
         $payload = Validator::sanitizeInput($this->body());
-        if (isset($payload['title']) && !isset($payload['slug'])) {
+        if (isset($payload['title']) && (!isset($payload['slug']) || trim((string) $payload['slug']) === '')) {
             $payload['slug'] = $this->slugify((string) $payload['title']);
         }
 

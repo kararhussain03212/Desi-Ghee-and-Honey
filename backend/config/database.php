@@ -16,6 +16,10 @@ final class Database
 
     private static function isLocalRuntime(): bool
     {
+        if (PHP_SAPI === 'cli') {
+            return true;
+        }
+
         $host = strtolower((string) ($_SERVER['HTTP_HOST'] ?? ''));
         $host = trim(explode(':', $host)[0] ?? '');
         return in_array($host, ['localhost', '127.0.0.1', '::1'], true);

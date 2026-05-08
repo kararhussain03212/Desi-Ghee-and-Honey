@@ -4,18 +4,15 @@ declare(strict_types=1);
 
 namespace Backend\Utils;
 
+use RuntimeException;
+
 final class FileUpload
 {
-    private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'svg', 'gif', 'jfif', 'avif'];
+    private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png'];
     private const ALLOWED_MIME = [
         'image/jpeg',
         'image/pjpeg',
         'image/png',
-        'image/webp',
-        'image/svg+xml',
-        'image/gif',
-        'image/avif',
-        'text/plain', // some SVG files are detected as text/plain on Windows/PHP setups
         'application/octet-stream',
     ];
     private const MAX_SIZE = 5242880;
@@ -28,8 +25,9 @@ final class FileUpload
         'icons',
         'profiles',
     ];
+    private const WEBP_QUALITY = 82;
 
-    public static function upload(array $file, string $folder): array
+    public static function upload(array $file, string $folder, ?string $oldPath = null): array
     {
         $errorCode = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
         if ($errorCode !== UPLOAD_ERR_OK) {
@@ -50,12 +48,8 @@ final class FileUpload
         $name = (string) ($file['name'] ?? '');
         $tmpPath = (string) ($file['tmp_name'] ?? '');
         $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-        if ($ext === 'jfif') {
-            $ext = 'jpg';
-        }
-
         if (!in_array($ext, self::ALLOWED_EXTENSIONS, true)) {
-            Response::error('Invalid file extension. Allowed: jpg, jpeg, png, webp, svg, gif, avif', 422);
+            Response::error('Invalid file extension. Allowed: jpg, jpeg, png', 422);
         }
 
         if ($tmpPath === '' || !is_file($tmpPath)) {
@@ -77,18 +71,140 @@ final class FileUpload
             Response::error('Unable to create upload directory', 500);
         }
 
-        $newName = uniqid('img_', true) . '.' . $ext;
+        $canConvertToWebp = self::isWebpAvailable();
+        $targetExt = $canConvertToWebp ? 'webp' : $ext;
+        $newName = uniqid('img_', true) . '.' . $targetExt;
         $target = $dir . '/' . $newName;
+        $actualMime = $canConvertToWebp ? 'image/webp' : $mime;
 
-        if (!move_uploaded_file($tmpPath, $target)) {
-            Response::error('Failed to save file', 500);
+        if ($canConvertToWebp) {
+            try {
+                self::convertTempImageToWebp($tmpPath, $target);
+                @unlink($tmpPath);
+            } catch (RuntimeException $e) {
+                $targetExt = $ext;
+                $newName = uniqid('img_', true) . '.' . $targetExt;
+                $target = $dir . '/' . $newName;
+                $actualMime = $mime;
+                if (!move_uploaded_file($tmpPath, $target)) {
+                    Response::error('Failed to save file', 500);
+                }
+            }
+        } else {
+            if (!move_uploaded_file($tmpPath, $target)) {
+                Response::error('Failed to save file', 500);
+            }
+        }
+
+        if (is_string($oldPath) && trim($oldPath) !== '') {
+            self::deleteExistingUpload($oldPath);
         }
 
         return [
             'filename' => $newName,
             'path' => '/uploads/' . $folder . '/' . $newName,
-            'size' => $size,
-            'mime' => $mime,
+            'size' => (int) (filesize($target) ?: 0),
+            'mime' => $actualMime,
         ];
+    }
+
+    private static function isWebpAvailable(): bool
+    {
+        $gdReady = function_exists('imagewebp') && function_exists('imagecreatefromstring');
+        $imagickReady = class_exists('Imagick');
+        return $gdReady || $imagickReady;
+    }
+
+    private static function convertTempImageToWebp(string $sourcePath, string $targetPath): void
+    {
+        $gdReady = function_exists('imagewebp') && function_exists('imagecreatefromstring');
+        if ($gdReady) {
+            self::convertWithGd($sourcePath, $targetPath);
+            return;
+        }
+
+        if (class_exists('Imagick')) {
+            self::convertWithImagick($sourcePath, $targetPath);
+            return;
+        }
+
+        throw new RuntimeException('WebP conversion is unavailable on server.');
+    }
+
+    private static function convertWithGd(string $sourcePath, string $targetPath): void
+    {
+        $bytes = @file_get_contents($sourcePath);
+        if ($bytes === false) {
+            throw new RuntimeException('Failed to read uploaded file for conversion.');
+        }
+
+        $image = @imagecreatefromstring($bytes);
+        if ($image === false) {
+            throw new RuntimeException('Uploaded image format is not supported for WebP conversion.');
+        }
+        if (function_exists('imagepalettetotruecolor')) {
+            @imagepalettetotruecolor($image);
+        }
+        imagealphablending($image, true);
+        imagesavealpha($image, true);
+
+        if (!@imagewebp($image, $targetPath, self::WEBP_QUALITY)) {
+            imagedestroy($image);
+            throw new RuntimeException('Failed to convert image to WebP.');
+        }
+
+        imagedestroy($image);
+    }
+
+    private static function convertWithImagick(string $sourcePath, string $targetPath): void
+    {
+        try {
+            $img = new \Imagick($sourcePath);
+            $img->setImageFormat('webp');
+            $img->setImageCompressionQuality(self::WEBP_QUALITY);
+            $img->stripImage();
+            if (!$img->writeImage($targetPath)) {
+                $img->clear();
+                $img->destroy();
+                throw new RuntimeException('Failed to convert image to WebP.');
+            }
+            $img->clear();
+            $img->destroy();
+        } catch (\Throwable $e) {
+            throw new RuntimeException('WebP conversion failed: ' . $e->getMessage());
+        }
+    }
+
+    private static function deleteExistingUpload(string $oldPath): void
+    {
+        $path = parse_url(trim($oldPath), PHP_URL_PATH);
+        if (!is_string($path) || $path === '' || !str_starts_with($path, '/uploads/')) {
+            return;
+        }
+
+        $relative = ltrim(substr($path, strlen('/uploads/')), '/');
+        if ($relative === '') {
+            return;
+        }
+
+        $uploadsRoot = realpath(dirname(__DIR__) . '/uploads');
+        if ($uploadsRoot === false) {
+            return;
+        }
+
+        $target = realpath($uploadsRoot . '/' . $relative);
+        if ($target === false) {
+            return;
+        }
+
+        $normalizedRoot = str_replace('\\', '/', $uploadsRoot);
+        $normalizedTarget = str_replace('\\', '/', $target);
+        if (!str_starts_with($normalizedTarget, $normalizedRoot . '/')) {
+            return;
+        }
+
+        if (is_file($target)) {
+            @unlink($target);
+        }
     }
 }

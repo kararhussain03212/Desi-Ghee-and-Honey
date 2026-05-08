@@ -144,7 +144,7 @@ export default function ProductList() {
               <div className="grid grid-cols-1 md:grid-cols-[220px_1fr]">
                 <img
                   src={resolveImage(item.image_path)}
-                  alt={item.title || "Product"}
+                  alt={item.image_alt || item.title || "Product"}
                   onError={(event) => {
                     event.currentTarget.onerror = null;
                     event.currentTarget.src = PRODUCT_FALLBACK_IMAGE;
@@ -165,6 +165,9 @@ export default function ProductList() {
                       </p>
                       <div className="mt-2 flex flex-wrap gap-2 text-xs">
                         <span className="rounded-md bg-white/10 px-2 py-1 text-white/80">
+                          Slug: {item.slug || "-"}
+                        </span>
+                        <span className="rounded-md bg-white/10 px-2 py-1 text-white/80">
                           Tag: {item.tag || "-"}
                         </span>
                         <span className="rounded-md bg-white/10 px-2 py-1 text-white/80">
@@ -173,6 +176,9 @@ export default function ProductList() {
                         <span className="rounded-md bg-white/10 px-2 py-1 text-white/80">
                           Price: PKR{" "}
                           {Number(item.price || 0).toLocaleString()}
+                        </span>
+                        <span className="rounded-md bg-white/10 px-2 py-1 text-white/80">
+                          Alt: {item.image_alt || "-"}
                         </span>
                       </div>
                     </div>

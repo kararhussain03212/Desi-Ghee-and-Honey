@@ -419,7 +419,8 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
   const uploadToSetting = async (settingKey, file, folder = "settings") => {
     try {
       setUploading(true);
-      const path = await uploadImage(file, folder);
+      const oldPath = String(form[settingKey] || "");
+      const path = await uploadImage(file, folder, oldPath);
       if (path) setField(settingKey, path);
     } catch (err) {
       console.error(err);
@@ -432,7 +433,8 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
   const uploadCardIcon = async (index, file) => {
     try {
       setUploading(true);
-      const path = await uploadImage(file, "icons");
+      const oldPath = String(gheeCards[index]?.icon_url || "");
+      const path = await uploadImage(file, "icons", oldPath);
       if (!path) return;
       setGheeCards((prev) =>
         prev.map((item, i) => (i === index ? { ...item, icon_url: path } : item)),
@@ -448,7 +450,8 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
   const uploadAboutCategoryIcon = async (index, file) => {
     try {
       setUploading(true);
-      const path = await uploadImage(file, "icons");
+      const oldPath = String(aboutPageCategories[index]?.icon_url || "");
+      const path = await uploadImage(file, "icons", oldPath);
       if (!path) return;
       setAboutPageCategories((prev) =>
         prev.map((item, i) => (i === index ? { ...item, icon_url: path } : item)),
@@ -464,7 +467,8 @@ export default function SiteSettings({ forcedMainSection = "", forcedHomeSection
   const uploadAboutProcessIcon = async (index, file) => {
     try {
       setUploading(true);
-      const path = await uploadImage(file, "icons");
+      const oldPath = String(aboutPageProcessCards[index]?.icon_url || "");
+      const path = await uploadImage(file, "icons", oldPath);
       if (!path) return;
       setAboutPageProcessCards((prev) =>
         prev.map((item, i) => (i === index ? { ...item, icon_url: path } : item)),

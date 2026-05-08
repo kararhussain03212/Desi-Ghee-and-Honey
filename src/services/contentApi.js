@@ -106,7 +106,9 @@ export function normalizeProduct(product) {
   return {
     ...product,
     id: String(product.id),
+    slug: String(product.slug || product.id || ''),
     image: absoluteUrl(product.image_path),
+    imageAlt: decodeHtmlEntities(product.image_alt || product.title || ''),
     badge: product.badge || 'New',
     code: product.sku || `SKU-${product.id}`,
     oldPrice: product.old_price === null ? null : Number(product.old_price || 0),
@@ -128,7 +130,9 @@ export async function fetchPublicHeroSlides() {
 
   return data.map((slide) => ({
     id: String(slide.id),
+    slug: String(slide.slug || slide.id || ''),
     image: absoluteUrl(slide.image_path),
+    imageAlt: decodeHtmlEntities(slide.image_alt || slide.title || ''),
     title: String(slide.title || ''),
     subtitle: String(slide.subtitle || ''),
     buttonText: slide.button_text || 'Shop Now',
@@ -142,7 +146,9 @@ export async function fetchPublicTestimonials() {
 
   return data.map((item) => ({
     id: String(item.id),
+    slug: String(item.slug || item.id || ''),
     avatar: absoluteUrl(item.avatar_path),
+    avatarAlt: decodeHtmlEntities(item.avatar_alt || item.name || ''),
     name: decodeHtmlEntities(item.name),
     role: decodeHtmlEntities(item.role || 'Customer'),
     review: decodeHtmlEntities(item.review || ''),

@@ -16,13 +16,14 @@ final class UploadController extends BaseController
     public function upload(array $params = []): void
     {
         $folder = (string) ($_POST['folder'] ?? 'misc');
+        $oldPath = isset($_POST['old_path']) ? (string) $_POST['old_path'] : null;
         $file = $_FILES['file'] ?? null;
 
         if (!is_array($file)) {
             Response::error('file is required', 422);
         }
 
-        $uploaded = FileUpload::upload($file, $folder);
+        $uploaded = FileUpload::upload($file, $folder, $oldPath);
 
         Response::success($uploaded, 'File uploaded successfully', 201);
     }
