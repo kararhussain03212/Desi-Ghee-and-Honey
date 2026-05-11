@@ -110,7 +110,7 @@ function Product() {
   const productVideoEmbedUrl = getYouTubeEmbedUrl(productVideoUrl);
 
   return (
-    <main className="productPage" aria-label="Product page">
+    <section className="productPage" aria-label="Product page">
       <section
         className="aboutHero"
         aria-label="About hero"
@@ -316,7 +316,7 @@ function Product() {
         id="shop"
         aria-label="Fresh honey products"
       ></section> */}
-    </main>
+    </section>
   );
 }
 

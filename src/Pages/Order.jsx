@@ -71,7 +71,7 @@ function Order() {
   }
 
   return (
-    <main className="orderPage" aria-label="Order page">
+    <section className="orderPage" aria-label="Order page">
       {/* <section className="aboutHero" aria-label="About hero" style={{backgroundImage: `url(${slide1})`}}>
         <img className="aboutHero__decor aboutHero__decor--left" src={honeyL} alt="" />
         <img className="aboutHero__decor aboutHero__decor--right" src={icon2} alt="" />
@@ -235,7 +235,7 @@ function Order() {
           </div>
         </div>
       ) : null}
-    </main>
+    </section>
   )
 }
 

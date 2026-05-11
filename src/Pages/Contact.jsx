@@ -125,7 +125,7 @@ function Contact() {
     })
   }
   return (
-    <main className="contactPage" aria-label="contact page">
+    <section className="contactPage" aria-label="contact page">
       <section className="aboutHero" aria-label="About hero" style={{ backgroundImage: `url(${heroImage})` }}>
         {/* <img className="aboutHero__decor aboutHero__decor--left" src={honeyL} alt="" />
         <img className="aboutHero__decor aboutHero__decor--right" src={icon2} alt="" /> */}
@@ -272,7 +272,7 @@ function Contact() {
           />
         </div>
       </section>
-    </main>
+    </section>
   )
 }
 

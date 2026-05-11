@@ -109,7 +109,7 @@ function About() {
   const processCards = getSettingJson(settings, 'about_page_process_cards', [])
 
   return (
-    <main className="aboutPage" aria-label="About page">
+    <section className="aboutPage" aria-label="About page">
       <section className="aboutHero" aria-label="About hero" style={{ backgroundImage: `url(${heroImage})` }}>
         <div className="aboutHero__inner" data-aos="fade-up" data-aos-duration="1000">
           <h1 className="aboutHero__title">{pageTitle}</h1>
@@ -265,7 +265,7 @@ function About() {
           </div>
         </div>
       </section>
-    </main>
+    </section>
   )
 }
 

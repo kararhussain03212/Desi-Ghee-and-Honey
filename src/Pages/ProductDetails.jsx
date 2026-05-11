@@ -107,7 +107,7 @@ function ProductDetails() {
 
   if (!product) {
     return (
-      <main className="pdPage" aria-label="Product details">
+      <section className="pdPage" aria-label="Product details">
         <section className="pdSection">
           <div className="pdInner">
             <h1 className="pdTitle">Product not found</h1>
@@ -116,12 +116,12 @@ function ProductDetails() {
             </Link>
           </div>
         </section>
-      </main>
+      </section>
     )
   }
 
   return (
-    <main className="pdPage" aria-label="Product details">
+    <section className="pdPage" aria-label="Product details">
       <section className="aboutHero" aria-label="About hero" style={{ backgroundImage: `url(${about1})` }}>
         <div className="aboutHero__inner" data-aos="fade-up" data-aos-duration="1000">
           <h1 className="aboutHero__title">Product Details</h1>
@@ -269,7 +269,7 @@ function ProductDetails() {
           </div>
         </div>
       ) : null}
-    </main>
+    </section>
   )
 }
 

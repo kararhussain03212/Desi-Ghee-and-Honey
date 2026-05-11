@@ -83,7 +83,10 @@ function Footer() {
         { label: footerLinkContact, path: "/contact" },
       ];
 
-  const filteredFooterLinks = footerLinks.filter((item) => {
+  const uniqueFooterLinks = footerLinks.filter((item, index, arr) => (
+    arr.findIndex((candidate) => candidate.path === item.path) === index
+  ))
+  const filteredFooterLinks = uniqueFooterLinks.filter((item) => {
     if (item.path === '/about') return isSectionActive(settings, 'about', true)
     if (item.path === '/product') return isSectionActive(settings, 'product', true)
     if (item.path === '/contact') return isSectionActive(settings, 'contact', true)

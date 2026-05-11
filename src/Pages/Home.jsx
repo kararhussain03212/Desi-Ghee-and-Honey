@@ -325,7 +325,7 @@ function Home() {
   }, [slidesPerView])
 
   return (
-    <main className="home" id="home">
+    <section className="home" id="home" aria-label="Home page content">
       <section className="hero" aria-label="Hero slider">
         <Swiper
           key={`hero-swiper-${slides.length}`}
@@ -685,7 +685,7 @@ function Home() {
       ) : null}
 
       
-    </main>
+    </section>
   )
 }
 
