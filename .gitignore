@@ -27,3 +27,11 @@ dist-ssr
 *.sln
 *.sw?
 backend/.env
+
+# Subdirectory dependencies and builds
+admin/node_modules
+admin/dist
+admin/dist-ssr
+my-react-router-app/node_modules
+my-react-router-app/dist
+my-react-router-app/dist-ssr
