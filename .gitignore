@@ -18,7 +18,7 @@ dist-ssr
 backend/.env
 backend/.env.production
 admin/.env
-admin/.env.production
+admin/.env.example
 **/.env*
 
 # Editor directories and files
